@@ -1,10 +1,7 @@
 package org.briansimulator.briandroid.Simulations;
 
-import android.util.StringBuilderPrinter;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -12,7 +9,7 @@ import java.util.Random;
  * Created by achilleas on 10/06/13.
  *
  * Implementation of simplifiedcoba.py found in the original brian repository,
- * which is in turn a standalone version of the COBA brian test script.
+ * which is in turn a standalone version of the COBA simulation.
  * Original description follows:
  *
  *

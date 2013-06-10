@@ -8,47 +8,42 @@ import java.util.Map;
 /**
  * Helper class for providing sample content for user interfaces created by
  * Android template wizards.
- * <p>
  * TODO: Replace all uses of this class before publishing your app.
  */
 public class SimulationContent {
 
-    /**
-     * An array of sample (Simulations) items.
-     */
-    public static List<SimItem> ITEMS = new ArrayList<SimItem>();
-
-    /**
-     * A map of sample (Simulations) items, by ID.
-     */
-    public static Map<String, SimItem> ITEM_MAP = new HashMap<String, SimItem>();
+    public static List<SimItem> SIMS = new ArrayList<SimItem>();
+    public static Map<String, SimItem> SIMS_MAP = new HashMap<String, SimItem>();
 
     static {
         // Add 3 sample items.
-        addItem(new SimItem("COBA example", "COBA"));
-        addItem(new SimItem("CUBA example", "CUBA"));
+        addItem(new SimItem("COBA", "COBA simulation"));
+        addItem(new SimItem("CUBA", "CUBA simulation"));
     }
 
     private static void addItem(SimItem item) {
-        ITEMS.add(item);
-        ITEM_MAP.put(item.id, item);
+        SIMS.add(item);
+        SIMS_MAP.put(item.id, item);
     }
 
-    /**
-     * A Simulations item representing a piece of content.
-     */
     public static class SimItem {
         public String id;
-        public String content;
+        public String description;
+        public COBA simulation; // FIXME: COBA should be a subclass of some sort of simulation abstract class
 
-        public SimItem(String id, String content) {
+        public SimItem(String id, String description) {
             this.id = id;
-            this.content = content;
+            this.description = description;
+            this.simulation = new COBA();
         }
 
         @Override
         public String toString() {
-            return content;
+            return this.description;
+        }
+
+        public void run() {
+            this.simulation.run();
         }
     }
 }

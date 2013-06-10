@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import org.briansimulator.briandroid.Simulations.COBA;
 import org.briansimulator.briandroid.Simulations.SimulationContent;
 
 /**
@@ -21,6 +22,7 @@ public class ItemDetailFragment extends Fragment {
      * represents.
      */
     public static final String ARG_ITEM_ID = "item_id";
+    public static final String LOGID = "org.briansimulator.briandroid.ItemDetailActivity";
 
     /**
      * The Simulations content this fragment is presenting.
@@ -37,13 +39,13 @@ public class ItemDetailFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if (getArguments().containsKey(ARG_ITEM_ID)) {
             // Load the Simulations content specified by the fragment
             // arguments. In a real-world scenario, use a Loader
             // to load content from a content provider.
-            mItem = SimulationContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
+            mItem = SimulationContent.SIMS_MAP.get(getArguments().getString(ARG_ITEM_ID));
         }
+
     }
 
     @Override
@@ -53,9 +55,14 @@ public class ItemDetailFragment extends Fragment {
 
         // Show the Simulations content as text in a TextView.
         if (mItem != null) {
-            ((TextView) rootView.findViewById(R.id.item_detail)).setText(mItem.content);
+           ((TextView) rootView.findViewById(R.id.item_detail)).setText(mItem.description);
         }
 
         return rootView;
     }
+
+    @Override
+    public View onResumeView(){return null;}
+
+
 }

@@ -75,7 +75,7 @@ public class ItemListFragment extends ListFragment {
                 getActivity(),
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
-                SimulationContent.ITEMS));
+                SimulationContent.SIMS));
     }
 
     @Override
@@ -115,7 +115,7 @@ public class ItemListFragment extends ListFragment {
 
         // Notify the active callbacks interface (the activity, if the
         // fragment is attached to one) that an item has been selected.
-        mCallbacks.onItemSelected(SimulationContent.ITEMS.get(position).id);
+        mCallbacks.onItemSelected(SimulationContent.SIMS.get(position).id);
     }
 
     @Override

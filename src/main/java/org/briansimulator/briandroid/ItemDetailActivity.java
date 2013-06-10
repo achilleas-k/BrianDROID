@@ -17,6 +17,7 @@ import android.view.MenuItem;
  */
 public class ItemDetailActivity extends FragmentActivity {
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,7 +47,7 @@ public class ItemDetailActivity extends FragmentActivity {
                     .add(R.id.item_detail_container, fragment)
                     .commit();
         }
-    }
+   }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -64,4 +65,5 @@ public class ItemDetailActivity extends FragmentActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
 }
