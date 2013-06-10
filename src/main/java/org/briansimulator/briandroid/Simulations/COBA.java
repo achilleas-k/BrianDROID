@@ -59,7 +59,12 @@ public class COBA {
     double[][] S = new double[3][N];
     double[][] dS = new double[3][N];
 
-    public static int getBinomial(int n, double p) {
+    public COBA() {
+
+    }
+
+
+    static int getBinomial(int n, double p) {
         // very crude
         // could also use apache commons library if it will make our lives easier
         int x = 0;
@@ -70,13 +75,13 @@ public class COBA {
         return x;
     }
 
-    public static int[] shuffle(int[] anArray) {
+    static int[] shuffle(int[] anArray) {
         // we could use Collections to automatically shuffle, but I'd rather
         // stick with primitives if I can (at least for now)
         int[] shuffled = anArray.clone();
         int len = shuffled.length;
         int r, tmp;
-        for (int max=len; max>0; max--) {
+        for (int max=len-1; max>0; max--) {
             r = rng.nextInt(max);
             tmp = shuffled[max];
             shuffled[max] = shuffled[r];
@@ -85,7 +90,7 @@ public class COBA {
         return shuffled;
     }
 
-    public static int[] randSample(int[] population, int k) {
+    static int[] randSample(int[] population, int k) {
         int[] shuffled = shuffle(population);
         return Arrays.copyOfRange(shuffled, 0, k);
     }
@@ -116,7 +121,9 @@ public class COBA {
         // Generate random connectivity matrix (note: no weights)
         List<int[]> W = new ArrayList<int[]>();
         int[] population = new int[N];
-        for (int i=0; i<N; i++, population[i]=i);
+        for (int i=0; i<N; i++) {
+            population[i]=i;
+        }
         for (int i=0; i<N; i++) {
             int k = getBinomial(N, p);
             int[] a = randSample(population, k);
