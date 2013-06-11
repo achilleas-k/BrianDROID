@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.briansimulator.briandroid.Simulations.SimulationContent;
-import org.briansimulator.briandroid.Simulations.COBA;
 
 /**
  * A fragment representing a single Item detail screen.
@@ -23,12 +22,12 @@ public class ItemDetailFragment extends Fragment {
      * represents.
      */
     public static final String ARG_ITEM_ID = "item_id";
-    public static final String LOGID = "org.briansimulator.briandroid.ItemDetailActivity";
+    public static final String LOGID = "BRIANDROIDDEBUG";
 
     /**
      * The Simulations content this fragment is presenting.
      */
-    private SimulationContent.SimItem sItem;
+    private SimulationContent.SimItem simItem;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -44,7 +43,7 @@ public class ItemDetailFragment extends Fragment {
             // Load the Simulations content specified by the fragment
             // arguments. In a real-world scenario, use a Loader
             // to load content from a content provider.
-            sItem = SimulationContent.SIMS_MAP.get(getArguments().getString(ARG_ITEM_ID));
+            simItem = SimulationContent.SIMS_MAP.get(getArguments().getString(ARG_ITEM_ID));
         }
 
     }
@@ -53,14 +52,12 @@ public class ItemDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_item_detail, container, false);
-
-        // Show the Simulations content as text in a TextView.
-        if (sItem != null) {
-            ((TextView) rootView.findViewById(R.id.item_detail)).setText(sItem.description);
-            Log.d(LOGID, "STARTING SIMULATION HERE!   "+sItem.description+"\n\n\n");
-            if (sItem.id.equals("COBA")) {
-                COBA thesim = new COBA();
-                thesim.run();
+        if (simItem != null) {
+            TextView statusView = (TextView) rootView.findViewById(R.id.item_detail);
+            Log.d(LOGID, "TextView is "+statusView.getId());
+            Log.d(LOGID, "STARTING SIMULATION HERE!   "+ simItem.description+"\n\n\n");
+            if (simItem.id.equals("COBA")) {
+                simItem.run(statusView);
             }
 
         }

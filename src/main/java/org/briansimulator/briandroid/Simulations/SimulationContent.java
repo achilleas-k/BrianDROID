@@ -1,5 +1,7 @@
 package org.briansimulator.briandroid.Simulations;
 
+import android.widget.TextView;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +31,7 @@ public class SimulationContent {
     public static class SimItem {
         public String id;
         public String description;
-        public COBA simulation; // FIXME: COBA should be a subclass of some sort of simulation abstract class
+        COBA simulation; // FIXME: COBA should be a subclass of some sort of simulation abstract class
 
         public SimItem(String id, String description) {
             this.id = id;
@@ -42,8 +44,8 @@ public class SimulationContent {
             return this.description;
         }
 
-        public void run() {
-            this.simulation.run();
+        public void run(TextView statusText) {
+            this.simulation.run(statusText);
         }
     }
 }
