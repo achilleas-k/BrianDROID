@@ -174,6 +174,10 @@ public class COBA {
                     // record spikes here
                     //spikesrec[n].add(t); // caused an outOfMemory exception. How fun!
                 }
+                // we can also check if we're in a refractory period before exiting the loop
+                if (LS[n] > t-refrac) {
+                    v[n] = Vr;
+                }
             }
 
             // spike propagation
@@ -190,16 +194,6 @@ public class COBA {
                 }
             }
 
-            // refractory period, if the last spike of neuron i was within
-            // refrac of the current time, fix the value to Vr
-            // --> clamp all neurons whose LS > t-refrac
-            for (int n=0; n<N; n++) {
-                if (LS[n] > t-refrac) {
-                    // TODO: move this to the state update loop
-                    v[n] = Vr;
-                }
-            }
-
             nspikes += spikes_t.size();
         }
 
@@ -208,6 +202,7 @@ public class COBA {
         simStateOutput += "Simulation finished.\nTime taken: "+wallclockDura+" ms\n";
         simStateOutput += "Total spikes fired: "+nspikes+"\n";
         simStateOutput += "Done!\n";
+
         statusText.setText(simStateOutput);
     }
 
