@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger>
+
+    <dataSet config="main" >
+        <source path="/home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res" >
+            <file
+                name="ic_launcher"
+                path="/home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/drawable-mdpi/ic_launcher.png"
+                qualifiers="mdpi"
+                type="drawable" />
+            <file
+                name="ic_launcher"
+                path="/home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/drawable-xxhdpi/ic_launcher.png"
+                qualifiers="xxhdpi"
+                type="drawable" />
+            <file
+                name="ic_launcher"
+                path="/home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/drawable-xhdpi/ic_launcher.png"
+                qualifiers="xhdpi"
+                type="drawable" />
+            <file
+                path="/home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/values-sw600dp/refs.xml"
+                qualifiers="sw600dp" >
+                <item
+                    name="activity_item_list"
+                    type="layout">
+@layout/activity_item_twopane
+                </item>
+            </file>
+            <file
+                path="/home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/values-large/refs.xml"
+                qualifiers="large" >
+                <item
+                    name="activity_item_list"
+                    type="layout">
+@layout/activity_item_twopane
+                </item>
+            </file>
+            <file
+                path="/home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/values-v11/styles.xml"
+                qualifiers="v11" >
+
+                <style
+                    name="AppBaseTheme"
+                    parent="android:Theme.Holo" >
+
+                    <!-- API 11 theme customizations can go here. -->
+                </style>
+            </file>
+            <file
+                path="/home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/values/strings.xml"
+                qualifiers="" >
+                <string name="button_run" >RUN
+                </string>
+                <string name="title_item_detail" >Item Detail
+                </string>
+                <string name="app_name" >BrianDROID
+                </string>
+            </file>
+            <file
+                path="/home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/values/styles.xml"
+                qualifiers="" >
+
+                <style
+                    name="AppBaseTheme"
+                    parent="android:Theme" >
+
+                    <!--
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+                    -->
+                </style>
+
+                <style
+                    name="AppTheme"
+                    parent="AppBaseTheme" >
+
+                    <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+                </style>
+            </file>
+            <file
+                name="ic_launcher"
+                path="/home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/drawable-hdpi/ic_launcher.png"
+                qualifiers="hdpi"
+                type="drawable" />
+            <file
+                name="activity_item_list"
+                path="/home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/layout/activity_item_list.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="activity_item_detail"
+                path="/home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/layout/activity_item_detail.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="fragment_item_detail"
+                path="/home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/layout/fragment_item_detail.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="activity_item_twopane"
+                path="/home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/layout/activity_item_twopane.xml"
+                qualifiers=""
+                type="layout" />
+        </source>
+        <source path="/home/achilleas/code/BrianDROIDProject/BrianDROID/build/res/rs/debug" />
+    </dataSet>
+    <dataSet config="debug" >
+        <source path="/home/achilleas/code/BrianDROIDProject/BrianDROID/src/debug/res" />
+    </dataSet>
+
+</merger>

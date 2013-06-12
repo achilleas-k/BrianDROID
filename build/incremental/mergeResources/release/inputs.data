@@ -1,0 +1,16 @@
+# incremental data. DO NOT EDIT.
+# format is <lastModified> <length> <SHA-1> <path>
+# Encoding is UTF-8
+1370873898000 228 6ed1842a4d2bb771d2c7a883bc8229b6eb4372bb /home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/values/strings.xml
+1370625921000 5175 534354c507097367211e57fb98007143baf5b7d0 /home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/drawable-hdpi/ic_launcher.png
+1370625923000 1378 6009c823bf85c82b8a35a97b867bcc287700f5a9 /home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/layout/activity_item_twopane.xml
+1370625921000 12595 5b09acd48353eca279ff7ee55a69fc6b5febb919 /home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/drawable-xxhdpi/ic_launcher.png
+1370625923000 370 bc147412eefcc131f36d2ad11b248d7ecd34eb96 /home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/values-large/refs.xml
+1370625922000 674 c78f92856947cb5742edaa3b94df76b0823dbbe7 /home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/values/styles.xml
+1370625922000 318 f37b4c43b290eba4a42d9102f14a550c301de5c8 /home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/values-v11/styles.xml
+1370966161000 340 b2990225d48dbdda0a9e79c33c5853b060a657c1 /home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/layout/activity_item_detail.xml
+1370625923000 463 de9ba1c7db1b316775bbe5a97d29d8e3e9c48a78 /home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/layout/activity_item_list.xml
+1370625923000 370 bc147412eefcc131f36d2ad11b248d7ecd34eb96 /home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/values-sw600dp/refs.xml
+1370625921000 7336 2f371522cb3e2316b003f72bdab3e3d23fd81d81 /home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/drawable-xhdpi/ic_launcher.png
+1370625923000 387 bc7bfb0810aacf427b80cf3741d685ca3aa49474 /home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/layout/fragment_item_detail.xml
+1370625921000 2908 bbbf2a5d9a29b61d2369cb3185307491b14746cc /home/achilleas/code/BrianDROIDProject/BrianDROID/src/main/res/drawable-mdpi/ic_launcher.png
