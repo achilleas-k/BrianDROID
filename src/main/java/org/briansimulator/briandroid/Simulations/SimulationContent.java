@@ -44,8 +44,9 @@ public class SimulationContent {
             return this.description;
         }
 
-        public void run(TextView statusText) {
-            this.simulation.run(statusText);
+        public void run(TextView tv) {
+            this.simulation.setProgressView(tv);
+            this.simulation.execute();
         }
     }
 }

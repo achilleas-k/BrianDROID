@@ -54,8 +54,6 @@ public class ItemDetailFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_item_detail, container, false);
         if (simItem != null) {
             TextView statusView = (TextView) rootView.findViewById(R.id.item_detail);
-            Log.d(LOGID, "TextView is "+statusView.getId());
-            Log.d(LOGID, "STARTING SIMULATION HERE!   "+ simItem.description+"\n\n\n");
             if (simItem.id.equals("COBA")) {
                 simItem.run(statusView);
             }
