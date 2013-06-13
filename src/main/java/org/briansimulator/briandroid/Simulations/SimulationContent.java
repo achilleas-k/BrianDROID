@@ -10,7 +10,8 @@ import java.util.Map;
 /**
  * Helper class for providing sample content for user interfaces created by
  * Android template wizards.
- * TODO: Replace all uses of this class before publishing your app.
+ * TODO: DESTROY THIS CLASS
+ *
  */
 public class SimulationContent {
 
@@ -46,7 +47,11 @@ public class SimulationContent {
 
         public void run(TextView tv) {
             this.simulation.setProgressView(tv);
-            this.simulation.execute();
+            if (this.simulation.getState() == 0) {
+                this.simulation.execute();
+            } else if (this.simulation.getState() == 2) {
+
+            }
         }
     }
 }

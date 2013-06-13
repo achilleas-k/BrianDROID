@@ -45,6 +45,7 @@ import java.util.Random;
 public class COBA extends AsyncTask<Void, String, Void> {
     // global random number generator
     static Random rng = new Random();
+    int STATE = 0; // 0: new; 1: running; 2: finished
 
     // units
     double second = 1.0;
@@ -72,7 +73,16 @@ public class COBA extends AsyncTask<Void, String, Void> {
     double[][] dS = new double[3][N];
 
     public COBA() {
+        setState(0);
 
+    }
+
+    private void setState(int s) {
+        STATE = s;
+    }
+
+    public int getState() {
+        return STATE;
     }
 
     private TextView progressText;
@@ -131,6 +141,7 @@ public class COBA extends AsyncTask<Void, String, Void> {
 
 
     protected Void doInBackground(Void... _) {
+        setState(1);
         for (int i=0; i<3; i++) {
             // probably unnecessary
             Arrays.fill(S[i], 0.0);
@@ -265,6 +276,7 @@ public class COBA extends AsyncTask<Void, String, Void> {
         Log.d("COBA", "DONE!!!");
         simStateOutput += "Done!\n";
         publishProgress(simStateOutput);
+        setState(2);
         return null;
     }
 
