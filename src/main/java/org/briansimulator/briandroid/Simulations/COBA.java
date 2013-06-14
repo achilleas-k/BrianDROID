@@ -1,7 +1,5 @@
 package org.briansimulator.briandroid.Simulations;
 
-import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.TextView;
@@ -11,7 +9,6 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 
 /**
@@ -40,17 +37,8 @@ import java.util.Random;
  *
  * =============================================================================
  *
- * TODO: Display progress on screen (text, progressbar, whatever)
  */
-public class COBA extends AsyncTask<Void, String, Void> {
-    // global random number generator
-    static Random rng = new Random();
-    int STATE = 0; // 0: new; 1: running; 2: finished
-
-    // units
-    double second = 1.0;
-    double ms = 0.001;
-    double mV = 0.001;
+public class COBA extends Simulation {
 
     // parameters
     int N = 4000;
@@ -74,6 +62,30 @@ public class COBA extends AsyncTask<Void, String, Void> {
 
     public COBA() {
         setState(0);
+    }
+
+    @Override
+    public void setup() {
+        // TODO: accept some sort of configuration object for dynamically setting up the parameters and simulation
+        // parameters
+        N = 4000;
+        Ne = (int)(N*0.8);
+        Ni = N-Ne;
+        Nplot = 4;
+        dt = 0.1*ms;
+        T = 1*second;
+        numsteps = (int)(T/dt);
+        p = 0.02;
+        Vr = 0*mV;
+        Vt = 10*mV;
+        we = 6.0/10.0; // excitatory synaptic weight (voltage)
+        wi = 67.0/10.0; // inhibitory synaptic weight
+        refrac = 5*ms;
+
+        // State variable S=[v;ge;gi] and variable used in Euler step
+        // dS=[v';ge';gi;] used in the main loop below
+        S = new double[3][N];
+        dS = new double[3][N];
 
     }
 
@@ -123,10 +135,6 @@ public class COBA extends AsyncTask<Void, String, Void> {
         return Arrays.copyOfRange(shuffled, 0, k);
     }
 
-    /* Checks if external storage is available for read and write.
-     * Another method that doesn't belong here.
-     */
-
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
@@ -140,7 +148,8 @@ public class COBA extends AsyncTask<Void, String, Void> {
     }
 
 
-    protected Void doInBackground(Void... _) {
+    @Override
+    public void run() {
         setState(1);
         for (int i=0; i<3; i++) {
             // probably unnecessary
@@ -196,6 +205,7 @@ public class COBA extends AsyncTask<Void, String, Void> {
         publishProgress(simStateOutput);
         double progress;
         for (int h=0; h<numsteps; h++) { // using integer loop variable to avoid f.p. arithmetic issues
+            // TODO: Display progress at fixed time intervals or e.g. at 10% increments
             //progress = 100.0*h/numsteps;
             //publishProgress(simStateOutput+progress+" %");
             t = h*dt;
@@ -261,7 +271,7 @@ public class COBA extends AsyncTask<Void, String, Void> {
             Log.d("COBA", "Writing data.");
             try {
                 File sdCard = Environment.getExternalStorageDirectory();
-                File dir = new File(sdCard.getAbsolutePath()+"/briandroid.tmp/");
+                File dir = new File(sdCard.getAbsolutePath()+"/briandroid.tmp/"); //TODO: optional save path
                 dir.mkdirs();
                 String spikesFilename = "briandroidCOBA.spikes";
                 File spikesFile = new File(dir, spikesFilename);
@@ -277,7 +287,7 @@ public class COBA extends AsyncTask<Void, String, Void> {
         simStateOutput += "Done!\n";
         publishProgress(simStateOutput);
         setState(2);
-        return null;
+        return;
     }
 
 }

@@ -2,13 +2,12 @@ package org.briansimulator.briandroid;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import org.briansimulator.briandroid.Simulations.SimulationContent;
+import org.briansimulator.briandroid.Simulations.Simulation;
 
 /**
  * A fragment representing a single Item detail screen.
@@ -22,12 +21,11 @@ public class ItemDetailFragment extends Fragment {
      * represents.
      */
     public static final String ARG_ITEM_ID = "item_id";
-    public static final String LOGID = "BRIANDROIDDEBUG";
 
     /**
      * The Simulations content this fragment is presenting.
      */
-    private SimulationContent.SimItem simItem;
+    private ItemListActivity.SimItem simItem;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -43,7 +41,7 @@ public class ItemDetailFragment extends Fragment {
             // Load the Simulations content specified by the fragment
             // arguments. In a real-world scenario, use a Loader
             // to load content from a content provider.
-            simItem = SimulationContent.SIMS_MAP.get(getArguments().getString(ARG_ITEM_ID));
+            simItem = ItemListActivity.SIMS_MAP.get(getArguments().getString(ARG_ITEM_ID));
         }
 
     }

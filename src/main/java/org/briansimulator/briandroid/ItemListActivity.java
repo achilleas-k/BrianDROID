@@ -3,6 +3,14 @@ package org.briansimulator.briandroid;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.widget.TextView;
+
+import org.briansimulator.briandroid.Simulations.COBA;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -30,6 +38,43 @@ public class ItemListActivity extends FragmentActivity
      */
     private boolean mTwoPane;
 
+
+    public static List<SimItem> SIMS = new ArrayList<SimItem>();
+    public static Map<String, SimItem> SIMS_MAP = new HashMap<String, SimItem>();
+
+
+    public static class SimItem {
+        public String id;
+        public String description;
+        COBA simulation;
+
+        public SimItem(String id, String description) {
+            this.id = id;
+            this.description = description;
+            this.simulation = new COBA();
+            this.simulation.setup();
+        }
+
+        @Override
+        public String toString() {
+            return this.description;
+        }
+
+        public void run(TextView tv) {
+            this.simulation.setProgressView(tv);
+            if (this.simulation.getState() == 0) {
+                this.simulation.execute();
+            } else if (this.simulation.getState() == 2) {
+
+            }
+        }
+    }
+
+    private static void addItem(SimItem item) {
+        SIMS.add(item);
+        SIMS_MAP.put(item.id, item);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +95,8 @@ public class ItemListActivity extends FragmentActivity
         }
 
         // TODO: If exposing deep links into your app, handle intents here.
+        addItem(new SimItem("COBA", "COBA simulation"));
+        addItem(new SimItem("CUBA", "CUBA simulation"));
     }
 
     /**
