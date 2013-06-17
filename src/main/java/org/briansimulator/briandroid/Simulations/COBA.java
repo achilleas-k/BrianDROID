@@ -45,20 +45,20 @@ public class COBA extends Simulation {
     int Ne;
     int Ni;
     int Nplot;
-    double dt;
-    double T;
+    float dt;
+    float T;
     int numsteps;
-    double p;
-    double Vr;
-    double Vt;
-    double we; // excitatory synaptic weight (voltage)
-    double wi; // inhibitory synaptic weight
-    double refrac;
+    float p;
+    float Vr;
+    float Vt;
+    float we; // excitatory synaptic weight (voltage)
+    float wi; // inhibitory synaptic weight
+    float refrac;
 
     // State variable S=[v;ge;gi] and variable used in Euler step
     // dS=[v';ge';gi;] used in the main loop below
-    double[][] S;
-    double[][] dS;
+    float[][] S;
+    float[][] dS;
 
     public COBA() {
         setState(0);
@@ -72,20 +72,20 @@ public class COBA extends Simulation {
         Ne = (int)(N*0.8);
         Ni = N-Ne;
         Nplot = 4;
-        dt = 0.1*ms;
+        dt = 0.1f*ms;
         T = 1*second;
         numsteps = (int)(T/dt);
-        p = 0.02;
+        p = 0.02f;
         Vr = 0*mV;
         Vt = 10*mV;
-        we = 6.0/10.0; // excitatory synaptic weight (voltage)
-        wi = 67.0/10.0; // inhibitory synaptic weight
+        we = 6.0f/10.0f; // excitatory synaptic weight (voltage)
+        wi = 67.0f/10.0f; // inhibitory synaptic weight
         refrac = 5*ms;
 
         // State variable S=[v;ge;gi] and variable used in Euler step
         // dS=[v';ge';gi;] used in the main loop below
-        S = new double[3][N];
-        dS = new double[3][N];
+        S = new float[3][N];
+        dS = new float[3][N];
 
     }
 
@@ -104,7 +104,7 @@ public class COBA extends Simulation {
     }
 
 
-    static int getBinomial(int n, double p) {
+    static int getBinomial(int n, float p) {
         // very crude
         // could also use apache commons library if it will make our lives easier
         int x = 0;
@@ -153,26 +153,29 @@ public class COBA extends Simulation {
         setState(1);
         for (int i=0; i<3; i++) {
             // probably unnecessary
-            Arrays.fill(S[i], 0.0);
-            Arrays.fill(dS[i], 0.0);
+            Arrays.fill(S[i], 0.0f);
+            Arrays.fill(dS[i], 0.0f);
         }
         String simStateOutput = "Setting up simulation ...\n";
         publishProgress(simStateOutput);
-        double[] v = S[0]; double[] ge = S[1]; double[] gi = S[2];
-        double[] v__tmp = dS[0]; double[] ge__tmp = dS[1]; double[] gi__tmp = dS[2];
+        float[] v = S[0]; float[] ge = S[1]; float[] gi = S[2];
+        float[] v__tmp = dS[0]; float[] ge__tmp = dS[1]; float[] gi__tmp = dS[2];
 
         // last spike times, stores the most recent time that a neuron has
         // spiked, which is used for refractory periods
-        double[] LS = new double[N];
+        float[] LS = new float[N];
         Arrays.fill(LS, -2*refrac);
 
         // Initialisation of state variables
         simStateOutput += "Initialising state variables ...\n";
         publishProgress(simStateOutput);
         for (int i=0; i<N; i++) {
-            S[0][i] = (rng.nextGaussian()*5-5)*mV;
-            S[1][i] = rng.nextGaussian()*1.5+4;
-            S[2][i] = rng.nextGaussian()*12+20;
+            //S[0][i] = (rng.nextGaussian()*5-5)*mV;
+            //S[1][i] = rng.nextGaussian()*1.5+4;
+            //S[2][i] = rng.nextGaussian()*12+20;
+            S[0][i] = (rng.nextFloat()*5-5)*mV;
+            S[1][i] = rng.nextFloat()*1.5f+4;
+            S[2][i] = rng.nextFloat()*12+20;
         }
 
         // Weight matrix
@@ -194,18 +197,17 @@ public class COBA extends Simulation {
         simStateOutput += "Setting up monitors ...\n";
         publishProgress(simStateOutput);
         int nspikes = 0;
-        ArrayList<Double>[] spikesrec = new ArrayList[N]; // array of arraylist of Double
+        ArrayList<Float>[] spikesrec = new ArrayList[N]; // array of arraylist of Float
         for (int n=0; n<N; n++) {
-            spikesrec[n] = new ArrayList<Double>();
+            spikesrec[n] = new ArrayList<Float>();
         }
 
-        double t;
+        float t;
         long start = System.currentTimeMillis();
         simStateOutput += "Running simulation ... ";
         publishProgress(simStateOutput);
-        double progress;
+        float progress;
         for (int h=0; h<numsteps; h++) { // using integer loop variable to avoid f.p. arithmetic issues
-            // TODO: Display progress at fixed time intervals or e.g. at 10% increments
             //progress = 100.0*h/numsteps;
             //publishProgress(simStateOutput+progress+" %");
             t = h*dt;
@@ -215,9 +217,9 @@ public class COBA extends Simulation {
             // dgi/dt = -gi*(1./taui) : 1
             ArrayList<Integer> spikes_t = new ArrayList<Integer>(); // spikes for time t
             for (int n=0; n<N; n++) {
-                v__tmp[n] = (-v[n]+ge[n]*(0.06-v[n])+gi[n]*(-0.02-v[n]))*(1.0/0.02);
-                ge__tmp[n] = -ge[n]*(1.0/0.005);
-                gi__tmp[n] = -gi[n]*(1.0/0.01);
+                v__tmp[n] = (-v[n]+ge[n]*(0.06f-v[n])+gi[n]*(-0.02f-v[n]))*(1.0f/0.02f);
+                ge__tmp[n] = -ge[n]*(1.0f/0.005f);
+                gi__tmp[n] = -gi[n]*(1.0f/0.01f);
                 S[0][n] += dt*dS[0][n];
                 S[1][n] += dt*dS[1][n];
                 S[2][n] += dt*dS[2][n];
@@ -263,7 +265,7 @@ public class COBA extends Simulation {
             Log.d("COBA", "Building output.");
             StringBuilder spikesString = new StringBuilder();
             for (int n=0; n<N; n++) {
-                for (double sp : spikesrec[n]) {
+                for (float sp : spikesrec[n]) {
                     spikesString.append(sp+" ");
                 }
                 spikesString.append("\n");

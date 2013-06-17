@@ -18,9 +18,9 @@ public abstract class Simulation extends AsyncTask<Void, String, Void> {
     int STATE = 0; // 0: new; 1: running; 2: finished
 
     // units
-    final double second = 1.0;
-    final double ms = 0.001;
-    final double mV = 0.001;
+    final float second = 1.0f;
+    final float ms = 0.001f;
+    final float mV = 0.001f;
 
     abstract void run();
 

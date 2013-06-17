@@ -7,15 +7,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import org.briansimulator.briandroid.Simulations.Simulation;
-
 /**
  * A fragment representing a single Item detail screen.
- * This fragment is either contained in a {@link ItemListActivity}
- * in two-pane mode (on tablets) or a {@link ItemDetailActivity}
+ * This fragment is either contained in a {@link BDMainActivity}
+ * in two-pane mode (on tablets) or a {@link SimulationDetailActivity}
  * on handsets.
  */
-public class ItemDetailFragment extends Fragment {
+public class SimulationDetailFragment extends Fragment {
     /**
      * The fragment argument representing the item ID that this fragment
      * represents.
@@ -25,13 +23,13 @@ public class ItemDetailFragment extends Fragment {
     /**
      * The Simulations content this fragment is presenting.
      */
-    private ItemListActivity.SimItem simItem;
+    private BDMainActivity.SimItem simItem;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public ItemDetailFragment() {
+    public SimulationDetailFragment() {
     }
 
     @Override
@@ -41,7 +39,7 @@ public class ItemDetailFragment extends Fragment {
             // Load the Simulations content specified by the fragment
             // arguments. In a real-world scenario, use a Loader
             // to load content from a content provider.
-            simItem = ItemListActivity.SIMS_MAP.get(getArguments().getString(ARG_ITEM_ID));
+            simItem = BDMainActivity.SIMS_MAP.get(getArguments().getString(ARG_ITEM_ID));
         }
 
     }
@@ -49,7 +47,7 @@ public class ItemDetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_item_detail, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_simulation_detail, container, false);
         if (simItem != null) {
             TextView statusView = (TextView) rootView.findViewById(R.id.item_detail);
             if (simItem.id.equals("COBA")) {
