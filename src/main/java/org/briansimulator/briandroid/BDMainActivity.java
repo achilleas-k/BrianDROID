@@ -1,6 +1,7 @@
 package org.briansimulator.briandroid;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -26,10 +27,8 @@ import java.util.Map;
 
 public class BDMainActivity extends ListActivity {
 
-    SimpleCursorAdapter mAdapter;
 
     public static List<Map<String, Simulation>> simList = new ArrayList<Map<String, Simulation>>();
-    public static Map<String, Simulation> SIMS_MAP = new HashMap<String, Simulation>();
 
 
     private void initList() {
@@ -60,6 +59,7 @@ public class BDMainActivity extends ListActivity {
         // The row layout that is used during the row creation
         // The keys used to retrieve the data
         // The View id used to show the data. The key number and the view id must match
+        // TODO: Replace with ArrayAdapter http://developer.android.com/reference/android/widget/ArrayAdapter.html
         SimpleAdapter simpleAdpt = new SimpleAdapter(this, simList, android.R.layout.simple_list_item_1, new String[] {"simulation"},
                 new int[] {android.R.id.text1});
 
@@ -71,31 +71,18 @@ public class BDMainActivity extends ListActivity {
 
             public void onItemClick(AdapterView<?> parentAdapter, View view, int position,
                                     long id) {
-
-                // We know the View is a TextView so we can cast it
-                TextView clickedView = (TextView) view;
-                // Send simulation object to the detail activity
-                Toast.makeText(BDMainActivity.this, "Item with id [" + id + "] - Position [" + position + "] - Planet [" + clickedView.getText() + "]",
-                        Toast.LENGTH_SHORT).show();
-
+                startSimulationActivity(id);
             }
         });
 
     }
 
-    // Called when a previously created loader has finished loading
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        // Swap the new cursor in.  (The framework will take care of closing the
-        // old cursor once we return.)
-        mAdapter.swapCursor(data);
+    public void startSimulationActivity(int loc) {
+        // get simulation object from HashMap
+        Simulation selectedSim = simList.get(loc).get("COBA");
+        // Send simulation object to the detail activity
+        Intent simulationIntent = new Intent(this, SimulationDetailActivity.class);
     }
 
-       // Called when a previously created loader is reset, making the data unavailable
-    public void onLoaderReset(Loader<Cursor> loader) {
-        // This is called when the last Cursor provided to onLoadFinished()
-        // above is about to be closed.  We need to make sure we are no
-        // longer using it.
-        mAdapter.swapCursor(null);
-    }
 
 }
