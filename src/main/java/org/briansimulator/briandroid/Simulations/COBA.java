@@ -64,6 +64,10 @@ public class COBA extends Simulation {
         setState(0);
     }
 
+    public String toString() {
+        return "COBA";
+    }
+
     @Override
     public void setup() {
         // TODO: accept some sort of configuration object for dynamically setting up the parameters and simulation

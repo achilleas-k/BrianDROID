@@ -25,10 +25,7 @@
         <activity
             android:name=".SimulationDetailActivity"
             android:label="@string/title_item_detail"
-            android:parentActivityName=".ItemListActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ItemListActivity" />
+            android:parentActivityName=".BDMainActivity" >
         </activity>
     </application>
 

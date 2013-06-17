@@ -1,11 +1,22 @@
 package org.briansimulator.briandroid;
 
-import android.content.Intent;
+import android.app.ListActivity;
+import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.provider.ContactsContract;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v4.widget.SimpleCursorAdapter;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.briansimulator.briandroid.Simulations.COBA;
+import org.briansimulator.briandroid.Simulations.Simulation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,116 +24,78 @@ import java.util.List;
 import java.util.Map;
 
 
-/**
- * An activity representing a list of Items. This activity
- * has different presentations for handset and tablet-size devices. On
- * handsets, the activity presents a list of items, which when touched,
- * lead to a {@link SimulationDetailActivity} representing
- * item details. On tablets, the activity presents the list of items and
- * item details side-by-side using two vertical panes.
- * <p>
- * The activity makes heavy use of fragments. The list of items is a
- * {@link SimulationListFragment} and the item details
- * (if present) is a {@link SimulationDetailFragment}.
- * <p>
- * This activity also implements the required
- * {@link SimulationListFragment.Callbacks} interface
- * to listen for item selections.
- */
-public class BDMainActivity extends FragmentActivity
-        implements SimulationListFragment.Callbacks {
+public class BDMainActivity extends ListActivity {
 
-    /**
-     * Whether or not the activity is in two-pane mode, i.e. running on a tablet
-     * device.
-     */
-    private boolean mTwoPane;
+    SimpleCursorAdapter mAdapter;
+
+    public static List<Map<String, Simulation>> simList = new ArrayList<Map<String, Simulation>>();
+    public static Map<String, Simulation> SIMS_MAP = new HashMap<String, Simulation>();
 
 
-    public static List<SimItem> SIMS = new ArrayList<SimItem>();
-    public static Map<String, SimItem> SIMS_MAP = new HashMap<String, SimItem>();
-
-
-    public static class SimItem {
-        public String id;
-        public String description;
-        COBA simulation;
-
-        public SimItem(String id, String description) {
-            this.id = id;
-            this.description = description;
-            this.simulation = new COBA();
-            this.simulation.setup();
-        }
-
-        @Override
-        public String toString() {
-            return this.description;
-        }
-
-        public void run(TextView tv) {
-            this.simulation.setProgressView(tv);
-            if (this.simulation.getState() == 0) {
-                this.simulation.execute();
-            } else if (this.simulation.getState() == 2) {
-
-            }
-        }
+    private void initList() {
+        simList.add(createSim("simulation", new COBA()));
+        simList.add(createSim("simulation", new COBA()));
     }
 
-    private static void addItem(SimItem item) {
-        SIMS.add(item);
-        SIMS_MAP.put(item.id, item);
+    private HashMap<String, Simulation> createSim(String key, Simulation sim) {
+        HashMap<String, Simulation> simulation = new HashMap<String, Simulation>();
+        simulation.put(key, sim);
+        return simulation;
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_simulation_list);
+        setContentView(R.layout.activity_briandroid_main);
 
-        if (findViewById(R.id.item_detail_container) != null) {
-            // The detail container view will be present only in the
-            // large-screen layouts (res/values-large and
-            // res/values-sw600dp). If this view is present, then the
-            // activity should be in two-pane mode.
-            mTwoPane = true;
+        initList();
 
-            // In two-pane mode, list items should be given the
-            // 'activated' state when touched.
-            ((SimulationListFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.item_list))
-                    .setActivateOnItemClick(true);
-        }
+        ListView lv = (ListView) findViewById(android.R.id.list);
 
-        // TODO: If exposing deep links into your app, handle intents here.
-        addItem(new SimItem("COBA", "COBA simulation"));
-        addItem(new SimItem("CUBA", "CUBA simulation"));
+
+        // This is a simple adapter that accepts as parameter
+        // Context
+        // Data list
+        // The row layout that is used during the row creation
+        // The keys used to retrieve the data
+        // The View id used to show the data. The key number and the view id must match
+        SimpleAdapter simpleAdpt = new SimpleAdapter(this, simList, android.R.layout.simple_list_item_1, new String[] {"simulation"},
+                new int[] {android.R.id.text1});
+
+        lv.setAdapter(simpleAdpt);
+
+
+        // React to user clicks on item
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            public void onItemClick(AdapterView<?> parentAdapter, View view, int position,
+                                    long id) {
+
+                // We know the View is a TextView so we can cast it
+                TextView clickedView = (TextView) view;
+                // Send simulation object to the detail activity
+                Toast.makeText(BDMainActivity.this, "Item with id [" + id + "] - Position [" + position + "] - Planet [" + clickedView.getText() + "]",
+                        Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
     }
 
-    /**
-     * Callback method from {@link SimulationListFragment.Callbacks}
-     * indicating that the item with the given ID was selected.
-     */
-    @Override
-    public void onItemSelected(String id) {
-        if (mTwoPane) {
-            // In two-pane mode, show the detail view in this activity by
-            // adding or replacing the detail fragment using a
-            // fragment transaction.
-            Bundle arguments = new Bundle();
-            arguments.putString(SimulationDetailFragment.ARG_ITEM_ID, id);
-            SimulationDetailFragment fragment = new SimulationDetailFragment();
-            fragment.setArguments(arguments);
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.item_detail_container, fragment)
-                    .commit();
-
-        } else {
-            // In single-pane mode, simply start the detail activity
-            // for the selected item ID.
-            Intent detailIntent = new Intent(this, SimulationDetailActivity.class);
-            detailIntent.putExtra(SimulationDetailFragment.ARG_ITEM_ID, id);
-            startActivity(detailIntent);
-        }
+    // Called when a previously created loader has finished loading
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        // Swap the new cursor in.  (The framework will take care of closing the
+        // old cursor once we return.)
+        mAdapter.swapCursor(data);
     }
+
+       // Called when a previously created loader is reset, making the data unavailable
+    public void onLoaderReset(Loader<Cursor> loader) {
+        // This is called when the last Cursor provided to onLoadFinished()
+        // above is about to be closed.  We need to make sure we are no
+        // longer using it.
+        mAdapter.swapCursor(null);
+    }
+
 }
