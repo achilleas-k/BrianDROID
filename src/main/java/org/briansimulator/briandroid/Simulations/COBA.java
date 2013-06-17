@@ -41,24 +41,24 @@ import java.util.List;
 public class COBA extends Simulation {
 
     // parameters
-    int N = 4000;
-    int Ne = (int)(N*0.8);
-    int Ni = N-Ne;
-    int Nplot = 4;
-    double dt = 0.1*ms;
-    double T = 1*second;
-    int numsteps = (int)(T/dt);
-    double p = 0.02;
-    double Vr = 0*mV;
-    double Vt = 10*mV;
-    double we = 6.0/10.0; // excitatory synaptic weight (voltage)
-    double wi = 67.0/10.0; // inhibitory synaptic weight
-    double refrac = 5*ms;
+    int N;
+    int Ne;
+    int Ni;
+    int Nplot;
+    double dt;
+    double T;
+    int numsteps;
+    double p;
+    double Vr;
+    double Vt;
+    double we; // excitatory synaptic weight (voltage)
+    double wi; // inhibitory synaptic weight
+    double refrac;
 
     // State variable S=[v;ge;gi] and variable used in Euler step
     // dS=[v';ge';gi;] used in the main loop below
-    double[][] S = new double[3][N];
-    double[][] dS = new double[3][N];
+    double[][] S;
+    double[][] dS;
 
     public COBA() {
         setState(0);
