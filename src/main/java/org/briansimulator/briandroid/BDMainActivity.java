@@ -7,16 +7,12 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
-
-import org.briansimulator.briandroid.Simulations.COBA;
-import org.briansimulator.briandroid.Simulations.Simulation;
-
 
 public class BDMainActivity extends Activity {
 
+    public final static String EXTRA_MESSAGE = "org.briansimulator.briandroid.MESSAGE";
     private ListView simulationLV;
-    private Simulation[] simList;
+    private String[] simList;
     private ArrayAdapter arrayAdpt;
 
     @Override
@@ -26,32 +22,34 @@ public class BDMainActivity extends Activity {
 
 
         simulationLV = (ListView) findViewById(R.id.simulationListView);
-        simList = new Simulation[2];
-        simList[0] = new COBA();
-        simList[1] = new COBA();
+        simList = populateList();
 
         arrayAdpt = new ArrayAdapter(this, android.R.layout.simple_list_item_1, simList);
         simulationLV.setAdapter(arrayAdpt);
         // React to user clicks on item
         simulationLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
             public void onItemClick(AdapterView<?> parentAdapter, View view, int position,
                                     long id) {
-                //startSimulationActivity(id);
-                CharSequence message = "SELECTED POS " + position + " WITH ID " + id;
-                Toast toast = Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG);
-                toast.show();
+                String selectedSim = simList[position];
+                startSimulationActivity(selectedSim);
             }
         });
 
     }
 
-    public void startSimulationActivity(int loc) {
-        // get simulation object from HashMap
-        Simulation selectedSim = simList[loc];
+    public void startSimulationActivity(String sim) {
         // Send simulation object to the detail activity
         Intent simulationIntent = new Intent(this, SimulationActivity.class);
+        simulationIntent.putExtra(EXTRA_MESSAGE, sim);
+        startActivity(simulationIntent);
     }
 
-
+    private String[] populateList() {
+        // TODO: This method should read a specified directory (the simulation directory) and return the list of names
+        // Currently the list is hardcoded since the class files are built into the app
+        //File simulationDir = new File("Simulations");
+        //simList = simulationDir.list();
+        String[] list = {"COBA"};
+        return list;
+    }
 }

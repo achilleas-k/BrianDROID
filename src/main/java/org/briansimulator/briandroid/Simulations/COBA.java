@@ -93,20 +93,6 @@ public class COBA extends Simulation {
 
     }
 
-    private void setState(int s) {
-        STATE = s;
-    }
-
-    public int getState() {
-        return STATE;
-    }
-
-    private TextView progressText;
-
-    public void setProgressView(TextView tv) {
-        progressText = tv;
-    }
-
 
     static int getBinomial(int n, float p) {
         // very crude
