@@ -79,11 +79,11 @@ public class COBA extends Simulation {
         dt = 0.1f*ms;
         T = 1*second;
         numsteps = (int)(T/dt);
-        p = 0.02f;
+        p = (float)0.02;
         Vr = 0*mV;
         Vt = 10*mV;
-        we = 6.0f/10.0f; // excitatory synaptic weight (voltage)
-        wi = 67.0f/10.0f; // inhibitory synaptic weight
+        we = (float)6.0/(float)10.0; // excitatory synaptic weight (voltage)
+        wi = (float)67.0/(float)10.0; // inhibitory synaptic weight
         refrac = 5*ms;
 
         // State variable S=[v;ge;gi] and variable used in Euler step
