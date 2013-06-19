@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.briansimulator.briandroid.Simulations.COBA;
+import org.briansimulator.briandroid.Simulations.CUBA;
 import org.briansimulator.briandroid.Simulations.Simulation;
 
 public class SimulationActivity extends Activity {
@@ -59,6 +60,11 @@ public class SimulationActivity extends Activity {
     void initSimulation(String name) {
         if (name.equals("COBA")) {
             theSim = new COBA();
+            theSim.setup();
+            theSim.setProgressView(statusText);
+            Toast.makeText(toastContext, "Loaded simulation "+theSim.toString(), Toast.LENGTH_LONG).show();
+        } else if (name.equals("CUBA")) {
+            theSim = new CUBA();
             theSim.setup();
             theSim.setProgressView(statusText);
             Toast.makeText(toastContext, "Loaded simulation "+theSim.toString(), Toast.LENGTH_LONG).show();
