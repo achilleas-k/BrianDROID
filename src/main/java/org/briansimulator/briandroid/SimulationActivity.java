@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import org.briansimulator.briandroid.Simulations.COBA;
 import org.briansimulator.briandroid.Simulations.CUBA;
+import org.briansimulator.briandroid.Simulations.LickliderPitch;
 import org.briansimulator.briandroid.Simulations.Simulation;
 
 public class SimulationActivity extends Activity {
@@ -68,8 +69,15 @@ public class SimulationActivity extends Activity {
             theSim.setup();
             theSim.setProgressView(statusText);
             Toast.makeText(toastContext, "Loaded simulation "+theSim.toString(), Toast.LENGTH_LONG).show();
+        } else if (name.contains("Licklider")) {
+            theSim = new LickliderPitch();
+            theSim.setup();
+            theSim.setProgressView(statusText);
+            Toast.makeText(toastContext, "Loaded simulation "+theSim.toString(), Toast.LENGTH_LONG).show();
         }
     }
+
+
     void startSimulation() {
         theSim.execute();
     }

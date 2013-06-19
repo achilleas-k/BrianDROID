@@ -45,4 +45,7 @@ public abstract class Simulation extends AsyncTask<Void, String, Void> {
         progressText = tv;
     }
 
+    protected void onProgressUpdate(String... progress) {
+        progressText.setText(progress[0]);
+    }
 }

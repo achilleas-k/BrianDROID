@@ -50,7 +50,7 @@ public class BDMainActivity extends Activity {
         // Currently the list is hardcoded since the class files are built into the app
         //File simulationDir = new File("Simulations");
         //simList = simulationDir.list();
-        String[] list = {"COBA", "CUBA"};
+        String[] list = {"COBA", "CUBA", "Licklider (pitch)"};
         return list;
     }
 }

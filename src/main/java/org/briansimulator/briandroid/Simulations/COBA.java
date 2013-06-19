@@ -132,9 +132,6 @@ public class COBA extends Simulation {
         return false;
     }
 
-    protected void onProgressUpdate(String... progress) {
-        progressText.setText(progress[0]);
-    }
 
 
     @Override
