@@ -2,7 +2,6 @@ package org.briansimulator.briandroid.Simulations;
 
 import android.os.Environment;
 import android.util.Log;
-import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -160,12 +159,9 @@ public class COBA extends Simulation {
         simStateOutput += "Initialising state variables ...\n";
         publishProgress(simStateOutput);
         for (int i=0; i<N; i++) {
-            //S[0][i] = (rng.nextGaussian()*5-5)*mV;
-            //S[1][i] = rng.nextGaussian()*1.5+4;
-            //S[2][i] = rng.nextGaussian()*12+20;
-            S[0][i] = (rng.nextFloat()*5-5)*mV;
-            S[1][i] = rng.nextFloat()*1.5f+4;
-            S[2][i] = rng.nextFloat()*12+20;
+            S[0][i] = (float)(rng.nextGaussian()*5-5)*mV;
+            S[1][i] = (float)(rng.nextGaussian()*1.5+4);
+            S[2][i] = (float)(rng.nextGaussian()*12+20);
         }
 
         // Weight matrix
