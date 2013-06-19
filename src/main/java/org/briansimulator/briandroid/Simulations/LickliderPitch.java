@@ -8,26 +8,71 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
+ * Spike-based adaptation of Licklider's model of pitch processing
+ * (autocorrelation with delay lines) with phase locking.
+ *
  * Created by achilleas on 19/06/13.
  */
 public class LickliderPitch extends Simulation {
 
     private static String LOGID = "org.briansimulator.briandroid.LICKLIDERPITCH";
 
+    float dt;
+    float maxDelay;
+    float tau_ear;
+    float sigma_ear;
+    float min_freq;
+    float max_freq;
+
+    int N;
+    float tau;
+    float sigma;
+    float duration;
+
+    int numsteps;
+
+
+    // ear and sound state variables
+    float[] x;
+    float[] sound;
+    float[] frequency;
+
+    // coincidence detectors state variables
+    float[] v;
+
     public LickliderPitch() {
         setState(0);
     }
 
     public void setup() {
+        dt = (float)0.2*ms;
+        maxDelay = 20*ms;
+        tau_ear = 1*ms;
+        sigma_ear = (float)0.1;
+        min_freq = 50;
+        max_freq = 1000;
+        N = 300;
+        tau = 1;
+        sigma = (float)0.1;
+        duration = 500*ms;
+        numsteps = (int)(duration/dt);
 
+        x = new float[2];
+        sound = new float[2];
+        frequency = new float[2];
+
+        v = new float[N];
     }
 
     public void run() {
+
+    }
+
+    public void record() {
         setState(1);
         int minBufferSize = AudioRecord.getMinBufferSize(44100, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 
