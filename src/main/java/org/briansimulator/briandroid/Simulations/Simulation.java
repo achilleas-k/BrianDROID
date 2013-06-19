@@ -20,9 +20,9 @@ public abstract class Simulation extends AsyncTask<Void, String, Void> {
     protected TextView progressText;
 
     // units
-    final float second = 1.0f;
-    final float ms = 0.001f;
-    final float mV = 0.001f;
+    final float second = (float)1.0;
+    final float ms = (float)0.001;
+    final float mV = (float)0.001;
 
     abstract public void run();
 
