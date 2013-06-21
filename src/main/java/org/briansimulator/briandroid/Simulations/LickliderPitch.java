@@ -21,6 +21,7 @@ public class LickliderPitch extends Simulation {
 
     private static String LOGID = "org.briansimulator.briandroid.LICKLIDERPITCH";
 
+
     float dt;
     float maxDelay;
     float tau_ear;
@@ -66,6 +67,25 @@ public class LickliderPitch extends Simulation {
         frequency = new float[2];
 
         v = new float[N];
+    }
+
+    public float xi() {
+        return (float)(rng.nextGaussian());
+    }
+
+    public void updateEar(float t, float dt) {
+        int N = x.length;
+        for (int n=0; n<N; n++) {
+            sound[n] = (float)(Math.pow(5*Math.sin(2*Math.PI*frequency[n]*t), 3));
+            frequency[n] = 200+200*t;
+            x[n] += dt*((sound[n]-x[n])/tau_ear+sigma_ear*(float)(Math.sqrt(2.0/tau_ear))*xi());
+        }
+    }
+
+    public void updateNetwork() {
+        for (int n=0; n<N; n++) {
+            v[n] += -v[n]/tau+sigma*(float)(Math.sqrt(2/tau))*xi();
+        }
     }
 
     public void run() {
