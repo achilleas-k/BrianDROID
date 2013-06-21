@@ -69,11 +69,22 @@ public class LickliderPitch extends Simulation {
         v = new float[N];
     }
 
-    public float xi() {
+    float[][] connect(int N) {
+        // since we have full connectivity with fixed weight
+        // we'll just use a connection matrix for the delays
+        float[][] delays = new float[2][N];
+        Arrays.fill(delays[0], 0);
+        for (int n=0; n<N; n++) {
+            delays[1][n] = (float)(1/Math.exp(n/N*(max_freq-min_freq)+max_freq));
+        }
+        return delays;
+    }
+
+    float xi() {
         return (float)(rng.nextGaussian());
     }
 
-    public void updateEar(float t, float dt) {
+    void updateSound(float t, float dt) {
         int N = x.length;
         for (int n=0; n<N; n++) {
             sound[n] = (float)(Math.pow(5*Math.sin(2*Math.PI*frequency[n]*t), 3));
@@ -82,7 +93,7 @@ public class LickliderPitch extends Simulation {
         }
     }
 
-    public void updateNetwork() {
+    void updateNetwork() {
         for (int n=0; n<N; n++) {
             v[n] += -v[n]/tau+sigma*(float)(Math.sqrt(2/tau))*xi();
         }
