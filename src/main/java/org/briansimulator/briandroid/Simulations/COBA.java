@@ -137,8 +137,6 @@ public class COBA extends Simulation {
     List<int[]> connect() {
         // Weight matrix
         // Generate random connectivity matrix (note: no weights)
-        simStateOutput += "Generating random connectivity matrix ...\n";
-        publishProgress(simStateOutput);
         List<int[]> W = new ArrayList<int[]>();
         int[] population = new int[N];
         for (int i=0; i<N; i++) {
@@ -180,6 +178,8 @@ public class COBA extends Simulation {
             S[2][i] = (float)(rng.nextGaussian()*12+20);
         }
 
+        simStateOutput += "Generating random connectivity matrix ...\n";
+        publishProgress(simStateOutput);
         List<int[]> W = connect();
 
         simStateOutput += "Setting up monitors ...\n";
