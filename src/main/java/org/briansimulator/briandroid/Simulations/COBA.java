@@ -39,6 +39,7 @@ import java.util.List;
  */
 public class COBA extends Simulation {
 
+    String simStateOutput;
     // parameters
     int N;
     int Ne;
@@ -133,6 +134,24 @@ public class COBA extends Simulation {
     }
 
 
+    List<int[]> connect() {
+        // Weight matrix
+        // Generate random connectivity matrix (note: no weights)
+        simStateOutput += "Generating random connectivity matrix ...\n";
+        publishProgress(simStateOutput);
+        List<int[]> W = new ArrayList<int[]>();
+        int[] population = new int[N];
+        for (int i=0; i<N; i++) {
+            population[i]=i;
+        }
+        for (int i=0; i<N; i++) {
+            int k = getBinomial(N, p);
+            int[] a = randSample(population, k);
+            Arrays.sort(a);
+            W.add(a);
+        }
+        return W;
+    }
 
     @Override
     public void run() {
@@ -142,7 +161,7 @@ public class COBA extends Simulation {
             Arrays.fill(S[i], 0.0f);
             Arrays.fill(dS[i], 0.0f);
         }
-        String simStateOutput = "Setting up simulation ...\n";
+        simStateOutput = "Setting up simulation ...\n";
         publishProgress(simStateOutput);
         float[] v = S[0]; float[] ge = S[1]; float[] gi = S[2];
         float[] v__tmp = dS[0]; float[] ge__tmp = dS[1]; float[] gi__tmp = dS[2];
@@ -161,21 +180,7 @@ public class COBA extends Simulation {
             S[2][i] = (float)(rng.nextGaussian()*12+20);
         }
 
-        // Weight matrix
-        // Generate random connectivity matrix (note: no weights)
-        simStateOutput += "Generating random connectivity matrix ...\n";
-        publishProgress(simStateOutput);
-        List<int[]> W = new ArrayList<int[]>();
-        int[] population = new int[N];
-        for (int i=0; i<N; i++) {
-            population[i]=i;
-        }
-        for (int i=0; i<N; i++) {
-            int k = getBinomial(N, p);
-            int[] a = randSample(population, k);
-            Arrays.sort(a);
-            W.add(a);
-        }
+        List<int[]> W = connect();
 
         simStateOutput += "Setting up monitors ...\n";
         publishProgress(simStateOutput);
