@@ -20,6 +20,7 @@ import java.util.Arrays;
 public class LickliderPitch extends Simulation {
 
     private static String LOGID = "org.briansimulator.briandroid.LICKLIDERPITCH";
+    private String simStateOutput;
 
 
     float dt;
@@ -39,11 +40,16 @@ public class LickliderPitch extends Simulation {
 
     // ear and sound state variables
     float[] x;
-    float[] sound;
-    float[] frequency;
+    float sound;
+    float frequency;
 
     // coincidence detectors state variables
     float[] v;
+
+    float[][] delays;
+
+    ArrayList<Float>[] connectionBuffer; // for propagating activity with delays
+    int bufferLength;
 
     public LickliderPitch() {
         setState(0);
@@ -61,12 +67,9 @@ public class LickliderPitch extends Simulation {
         sigma = (float)0.1;
         duration = 500*ms;
         numsteps = (int)(duration/dt);
-
         x = new float[2];
-        sound = new float[2];
-        frequency = new float[2];
-
         v = new float[N];
+        bufferLength = (int)(maxDelay/dt);
     }
 
     float[][] connect(int N) {
@@ -85,11 +88,11 @@ public class LickliderPitch extends Simulation {
     }
 
     void updateSound(float t, float dt) {
+        frequency = 200+200*t;
+        sound = (float)(Math.pow(5*Math.sin(2*Math.PI*frequency*t), 3));
         int N = x.length;
         for (int n=0; n<N; n++) {
-            sound[n] = (float)(Math.pow(5*Math.sin(2*Math.PI*frequency[n]*t), 3));
-            frequency[n] = 200+200*t;
-            x[n] += dt*((sound[n]-x[n])/tau_ear+sigma_ear*(float)(Math.sqrt(2.0/tau_ear))*xi());
+            x[n] += dt*((sound-x[n])/tau_ear+sigma_ear*(float)(Math.sqrt(2.0/tau_ear))*xi());
         }
     }
 
@@ -99,7 +102,75 @@ public class LickliderPitch extends Simulation {
         }
     }
 
+    void propagate() {
+        int bsize = connectionBuffer[0].size();
+        // put receptor output at the beginning of the buffer
+        connectionBuffer[0].add(0, x[0]);
+        connectionBuffer[1].add(0, x[1]);
+        // remove last element
+        connectionBuffer[0].remove(bsize-1);
+        connectionBuffer[1].remove(bsize-1);
+        // propagate appropriate buffer values to receiving network
+        int d__tmp;
+        for (int n=0; n<N; n++) {
+            // since the first set of delays is always 0, let's ignore the delay
+            //d__tmp = (int)(delays[0][n]/dt);
+            v[n] += connectionBuffer[0].get(0);
+            d__tmp = (int)(delays[1][n]/dt);
+            v[n] += connectionBuffer[1].get(d__tmp);
+        }
+
+    }
+
+    int checkSpike(float t, int nspikes, ArrayList<Float>[] spikesrec) {
+        for (int n=0; n<N; n++) {
+            if (v[n] > 1) {
+                spikesrec[n].add(t);
+                nspikes++;
+            }
+        }
+        return nspikes;
+    }
+
     public void run() {
+        setState(1);
+        simStateOutput = "Setting up simulation ...";
+        publishProgress(simStateOutput);
+        Arrays.fill(x, 0);
+        Arrays.fill(v, 0);
+        connectionBuffer[0] = new ArrayList<Float>();
+        connectionBuffer[1] = new ArrayList<Float>();
+        for (int b=0; b<bufferLength; b++) {
+            // fill buffer with 0s
+            connectionBuffer[0].add((float)0);
+            connectionBuffer[1].add((float)0);
+        }
+
+
+        simStateOutput += "Generating connection matrix ...";
+        publishProgress(simStateOutput);
+        delays = connect(N);
+
+        simStateOutput += "Setting up monitors ...";
+        publishProgress(simStateOutput);
+        int nspikes = 0;
+        ArrayList<Float>[] spikesrec = new ArrayList[N]; // array of arraylist of Float
+        for (int n=0; n<N; n++) {
+            spikesrec[n] = new ArrayList<Float>();
+        }
+
+        float t;
+        long start = System.currentTimeMillis();
+        simStateOutput += "Running simulation ...";
+        publishProgress(simStateOutput);
+        for (int h=0; h<numsteps; h++) {
+            t = h*dt;
+            updateSound(t, dt); // loop of 2
+            updateNetwork(); // loop of N (400)
+            propagate(); // loop of N (400)
+            nspikes = checkSpike(t, nspikes, spikesrec); // loop of N
+        }
+
 
     }
 
