@@ -63,7 +63,7 @@ public class LickliderPitch extends Simulation {
         min_freq = 50;
         max_freq = 1000;
         N = 300;
-        tau = 1;
+        tau = 1*ms;
         sigma = (float)0.1;
         duration = 500*ms;
         numsteps = (int)(duration/dt);
@@ -73,8 +73,7 @@ public class LickliderPitch extends Simulation {
     }
 
     float[][] connect(int N) {
-        // since we have full connectivity with fixed weight
-        // we'll just use a connection matrix for the delays
+        // connection delays
         float[][] delays = new float[2][N];
         Arrays.fill(delays[0], 0);
         for (int n=0; n<N; n++) {
@@ -89,16 +88,17 @@ public class LickliderPitch extends Simulation {
 
     void updateSound(float t, float dt) {
         frequency = 200+200*t;
-        sound = (float)(Math.pow(5*Math.sin(2*Math.PI*frequency*t), 3));
+        sound = 5*(float)(Math.pow(Math.sin(2*Math.PI*frequency*t), 3));
         int N = x.length;
         for (int n=0; n<N; n++) {
             x[n] += dt*((sound-x[n])/tau_ear+sigma_ear*(float)(Math.sqrt(2.0/tau_ear))*xi());
         }
     }
 
-    void updateNetwork() {
+    void updateNetwork(ArrayList<Float>[] vrec) {
         for (int n=0; n<N; n++) {
-            v[n] += -v[n]/tau+sigma*(float)(Math.sqrt(2/tau))*xi();
+            v[n] += dt*(-v[n]/tau+sigma*(float)(Math.sqrt(2/tau))*xi());
+            vrec[n].add(v[n]);
         }
     }
 
@@ -115,29 +115,52 @@ public class LickliderPitch extends Simulation {
         for (int n=0; n<N; n++) {
             // since the first set of delays is always 0, let's ignore the delay
             //d__tmp = (int)(delays[0][n]/dt);
-            v[n] += connectionBuffer[0].get(0);
+            v[n] += connectionBuffer[0].get(0)*0.5; // weight = 0.5
             d__tmp = (int)(delays[1][n]/dt);
-            v[n] += connectionBuffer[1].get(d__tmp);
+            v[n] += connectionBuffer[1].get(d__tmp)*0.5; // weight = 0.5
         }
 
     }
 
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+
     int checkSpike(float t, int nspikes, ArrayList<Float>[] spikesrec) {
         for (int n=0; n<N; n++) {
-            if (v[n] > 1) {
+            if (v[n] > 1) { // threshold = 1
                 spikesrec[n].add(t);
                 nspikes++;
+                v[n] = 0; // reset
             }
         }
         return nspikes;
     }
 
+    void saveString(String path, String filename, String data) {
+            try {
+                File sdCard = Environment.getExternalStorageDirectory();
+                File dir = new File(sdCard.getAbsolutePath()+path); //TODO: optional save path
+                dir.mkdirs();
+                File spikesFile = new File(dir, filename);
+                FileOutputStream spikesStream = new FileOutputStream(spikesFile);
+                spikesStream.write(data.getBytes()); // this might be inefficient
+                spikesStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+    }
     public void run() {
         setState(1);
-        simStateOutput = "Setting up simulation ...";
+        simStateOutput = "Setting up simulation ...\n";
         publishProgress(simStateOutput);
         Arrays.fill(x, 0);
         Arrays.fill(v, 0);
+        connectionBuffer = new ArrayList[2];
         connectionBuffer[0] = new ArrayList<Float>();
         connectionBuffer[1] = new ArrayList<Float>();
         for (int b=0; b<bufferLength; b++) {
@@ -147,31 +170,62 @@ public class LickliderPitch extends Simulation {
         }
 
 
-        simStateOutput += "Generating connection matrix ...";
+        simStateOutput += "Generating connection matrix ...\n";
         publishProgress(simStateOutput);
         delays = connect(N);
 
-        simStateOutput += "Setting up monitors ...";
+        simStateOutput += "Setting up monitors ...\n";
         publishProgress(simStateOutput);
         int nspikes = 0;
         ArrayList<Float>[] spikesrec = new ArrayList[N]; // array of arraylist of Float
+        ArrayList<Float>[] vrec = new ArrayList[N]; // array of arraylist of Float
         for (int n=0; n<N; n++) {
             spikesrec[n] = new ArrayList<Float>();
+            vrec[n] = new ArrayList<Float>();
         }
 
         float t;
         long start = System.currentTimeMillis();
-        simStateOutput += "Running simulation ...";
+        simStateOutput += "Running simulation ...\n";
         publishProgress(simStateOutput);
         for (int h=0; h<numsteps; h++) {
             t = h*dt;
             updateSound(t, dt); // loop of 2
-            updateNetwork(); // loop of N (400)
+            updateNetwork(vrec); // loop of N (400)
             propagate(); // loop of N (400)
             nspikes = checkSpike(t, nspikes, spikesrec); // loop of N
+            // checkSpike could probably be combined with propagate
         }
+        long wallClockDura = System.currentTimeMillis()-start;
+        simStateOutput += "Simulation done.\nTime taken: "+wallClockDura+" ms \n";
+        simStateOutput += "Total spikes fired: "+nspikes+"\n";
+        simStateOutput += "Writing file(s) ...\n";
 
+        // save file with data
+        if (isExternalStorageWritable()) {
+            Log.d("Licklider", "Building output.");
+            StringBuilder spikesString = new StringBuilder();
+            StringBuilder vString = new StringBuilder();
+            for (int n=0; n<N; n++) {
+                for (float sp : spikesrec[n]) {
+                    spikesString.append(sp+" ");
+                }
+                spikesString.append("\n");
+                for (float v_nt : vrec[n]) {
+                    vString.append(v_nt+" ");
+                }
+                vString.append("\n");
+            }
+            Log.d("Licklider", "Writing data.");
+            saveString("/briandroid.tmp/", "briandroidLicklider.spikes", spikesString.toString());
+            saveString("/briandroid.tmp/", "briandroidLicklider.v", vString.toString());
 
+        }
+        Log.d("Licklider", "DONE!!!");
+        simStateOutput += "Done!\n";
+        publishProgress(simStateOutput);
+        setState(2);
+        return;
     }
 
     public void record() {
