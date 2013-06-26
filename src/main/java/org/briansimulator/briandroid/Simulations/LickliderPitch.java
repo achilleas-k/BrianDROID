@@ -42,6 +42,8 @@ public class LickliderPitch extends Simulation {
     float[] x;
     float sound;
     float frequency;
+    float[] xLS; // last spike
+    float xrefr;
 
     // coincidence detectors state variables
     float[] v;
@@ -49,7 +51,6 @@ public class LickliderPitch extends Simulation {
     float[][] delays;
 
     ArrayList<Float>[] connectionBuffer; // for propagating activity with delays
-    int bufferLength;
 
     public LickliderPitch() {
         setState(0);
@@ -69,11 +70,12 @@ public class LickliderPitch extends Simulation {
         N = 300;
         tau = 1*ms;
         sigma = (float)0.1;
-        duration = 50*ms;
+        duration = 100*ms;
         numsteps = (int)(duration/dt);
         x = new float[2];
         v = new float[N];
-        bufferLength = (int)(maxDelay/dt);
+        xLS = new float[2];
+        xrefr = 2*ms;
     }
 
     float[][] connect(int N) {
@@ -87,7 +89,6 @@ public class LickliderPitch extends Simulation {
         for (int n=0; n<N; n++) {
             delays[1][n] = (float)(1.0/Math.exp(logfreq));
             logfreq += step;
-            Log.d(LOGID, "DELAY: "+delays[1][n]);
         }
         return delays;
     }
@@ -100,14 +101,19 @@ public class LickliderPitch extends Simulation {
     void updateSound(float t, float dt, ArrayList<Float>[] xrec) {
         // updates the sound signal and the receptor states
         // checks for spikes
-        frequency = 200+200*t;
-        sound = 5*(float)(Math.pow(Math.sin(2*Math.PI*frequency*t), 3));
+        frequency = (float)(200.0+200.0*t);
+        sound = (float)(5.0*Math.pow(Math.sin(2.0*Math.PI*frequency*t), 3.0));
         int N = x.length;
         for (int n=0; n<N; n++) {
-            x[n] += dt*((sound-x[n])/tau_ear+sigma_ear*(float)(Math.sqrt(2.0/tau_ear))*xi());
+            if (xLS[n]+xrefr > t) {
+                x[n] = 0;
+            } else {
+                x[n] += dt*((sound-x[n])/tau_ear+sigma_ear*(float)(Math.sqrt(2.0/tau_ear))*xi());
+            }
             xrec[n].add(x[n]);
             if (x[n] > 1) {
                 x[n] = 0; // reset
+                xLS[n] = t;
                 connectionBuffer[n].add(t); // put spike at end of buffer
             }
         }
@@ -115,7 +121,7 @@ public class LickliderPitch extends Simulation {
 
     void updateNetwork(ArrayList<Float>[] vrec) {
         for (int n=0; n<N; n++) {
-            v[n] += dt*(-v[n]/tau+sigma*(float)(Math.sqrt(2/tau))*xi());
+            v[n] += dt*(-v[n]/tau+sigma*(float)(Math.sqrt(2.0/tau))*xi());
             vrec[n].add(v[n]);
         }
     }
@@ -124,29 +130,34 @@ public class LickliderPitch extends Simulation {
         // propagate appropriate buffer values to receiving network
         // this is rather simple since we have full connectivity so we can skip the destination check
         int delay;
+        int h = (int)(t/dt);
+        int h_spike;
         for (int n_net=0; n_net<N; n_net++) { // coincidence detectors
             for (int n_rec=0; n_rec<2; n_rec++) { // receptors
                 delay = (int)(delays[n_rec][n_net]/dt);
                 for (Float t_spike : connectionBuffer[n_rec]) {
-                    if (t_spike+delay >= t) { // >= due to float comparison issues
+                    h_spike = (int)(t_spike/dt);
+                    if (h_spike+delay == h) {
                         v[n_net] += 0.5; // weight = 0.5
-                    } else if (t_spike+delay < t) {
-                        // buffers are sorted/sequential, so if the first check fails,
-                        // there's no need to keep searching
+                    }/* else if (h_spike+delay > h) {
+                        // buffers are sorted/sequential, so there's no need to keep
+                        // searching after t
                         break;
-                    }
+                    }*/
                 }
             }
         }
+        /*
         // clean buffers
         for (int n_rec=0; n_rec<2; n_rec++) {
             for (Float t_spike : connectionBuffer[n_rec]) {
-                if (t_spike+maxDelay >= t) {
+                h_spike = (int)(t_spike/dt);
+                if (h_spike+maxDelay < h) {
                     connectionBuffer[n_rec].remove(t_spike);
                 }
             }
         }
-
+        */
     }
 
     boolean isExternalStorageWritable() {
@@ -196,6 +207,7 @@ public class LickliderPitch extends Simulation {
         publishProgress(simStateOutput);
         Arrays.fill(x, 0);
         Arrays.fill(v, 0);
+        Arrays.fill(xLS, -xrefr);
         connectionBuffer = new ArrayList[2];
         connectionBuffer[0] = new ArrayList<Float>();
         connectionBuffer[1] = new ArrayList<Float>();
@@ -224,7 +236,7 @@ public class LickliderPitch extends Simulation {
         simStateOutput += "Running simulation ...";
         publishProgress(simStateOutput);
         for (int h=0; h<numsteps; h++) {
-            //publishProgress(simStateOutput+" "+h+"/"+numsteps);
+            publishProgress(simStateOutput+" "+h+"/"+numsteps);
             t = h*dt;
             updateSound(t, dt, xrec); // loop of 2
             updateNetwork(vrec); // loop of N (400)
@@ -238,19 +250,11 @@ public class LickliderPitch extends Simulation {
         simStateOutput += "Writing file(s) ...\n";
         publishProgress(simStateOutput);
         // save file with data
-        ArrayList<Float>[] delays_al = new ArrayList[2];
-        for (int i=0; i<2; i++) {
-            delays_al[i] = new ArrayList<Float>();
-            for (int j=0; j<N; j++) {
-                delays_al[i].add(delays[i][j]);
-            }
-        }
         if (isExternalStorageWritable()) {
             Log.d("Licklider", "Writing data.");
             saveData("/briandroid.tmp/", "briandroidLicklider.spikes", spikesrec);
             saveData("/briandroid.tmp/", "briandroidLicklider.v", vrec);
             saveData("/briandroid.tmp/", "briandroidLicklider.x", xrec);
-            saveData("/briandroid.tmp/", "briandroidLicklider.delays", delays_al);
         }
         Log.d("Licklider", "DONE!!!");
         simStateOutput += "Done!\n";
