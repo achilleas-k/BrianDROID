@@ -55,9 +55,13 @@ public class LickliderPitch extends Simulation {
         setState(0);
     }
 
+    public String toString() {
+        return "Licklider model";
+    }
+
     public void setup() {
-        dt = (float)0.2*ms;
-        maxDelay = 20*ms;
+        dt = (float)0.02*ms;
+        maxDelay = 22*ms;
         tau_ear = 1*ms;
         sigma_ear = (float)0.1;
         min_freq = 50;
@@ -65,7 +69,7 @@ public class LickliderPitch extends Simulation {
         N = 300;
         tau = 1*ms;
         sigma = (float)0.1;
-        duration = 500*ms;
+        duration = 50*ms;
         numsteps = (int)(duration/dt);
         x = new float[2];
         v = new float[N];
