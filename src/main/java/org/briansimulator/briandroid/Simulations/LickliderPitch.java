@@ -120,27 +120,36 @@ public class LickliderPitch extends Simulation {
         }
     }
 
-    void propagate() {
-        int bsize = connectionBuffer[0].size();
-        // put receptor output at the beginning of the buffer
-        connectionBuffer[0].add(0, x[0]);
-        connectionBuffer[1].add(0, x[1]);
-        // remove last element
-        connectionBuffer[0].remove(bsize-1);
-        connectionBuffer[1].remove(bsize-1);
+    void propagate(float t) {
         // propagate appropriate buffer values to receiving network
-        int d__tmp;
-        for (int n=0; n<N; n++) {
-            // since the first set of delays is always 0, let's ignore the delay
-            //d__tmp = (int)(delays[0][n]/dt);
-            v[n] += connectionBuffer[0].get(0)*0.5; // weight = 0.5
-            d__tmp = (int)(delays[1][n]/dt);
-            v[n] += connectionBuffer[1].get(d__tmp)*0.5; // weight = 0.5
+        // this is rather simple since we have full connectivity so we can skip the destination check
+        int delay;
+        for (int n_net=0; n_net<N; n_net++) { // coincidence detectors
+            for (int n_rec=0; n_rec<2; n_rec++) { // receptors
+                delay = (int)(delays[n_rec][n_net]/dt);
+                for (Float t_spike : connectionBuffer[n_rec]) {
+                    if (t_spike+delay >= t) { // >= due to float comparison issues
+                        v[n_net] += 0.5; // weight = 0.5
+                    } else if (t_spike+delay < t) {
+                        // buffers are sorted/sequential, so if the first check fails,
+                        // there's no need to keep searching
+                        break;
+                    }
+                }
+            }
+        }
+        // clean buffers
+        for (int n_rec=0; n_rec<2; n_rec++) {
+            for (Float t_spike : connectionBuffer[n_rec]) {
+                if (t_spike+maxDelay >= t) {
+                    connectionBuffer[n_rec].remove(t_spike);
+                }
+            }
         }
 
     }
 
-    public boolean isExternalStorageWritable() {
+    boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
             return true;
