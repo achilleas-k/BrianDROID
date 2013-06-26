@@ -80,8 +80,14 @@ public class LickliderPitch extends Simulation {
         // connection delays
         float[][] delays = new float[2][N];
         Arrays.fill(delays[0], 0);
+        float start = (float)Math.log(max_freq);
+        float end = (float)Math.log(min_freq);
+        float step = (end-start)/N;
+        float logfreq = start;
         for (int n=0; n<N; n++) {
-            delays[1][n] = (float)(1/Math.exp(n/N*(max_freq-min_freq)+max_freq));
+            delays[1][n] = (float)(1.0/Math.exp(logfreq));
+            logfreq += step;
+            Log.d(LOGID, "DELAY: "+delays[1][n]);
         }
         return delays;
     }
