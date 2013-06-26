@@ -92,16 +92,24 @@ public class LickliderPitch extends Simulation {
         return delays;
     }
 
+
     float xi() {
         return (float)(rng.nextGaussian());
     }
 
-    void updateSound(float t, float dt) {
+    void updateSound(float t, float dt, ArrayList<Float>[] xrec) {
+        // updates the sound signal and the receptor states
+        // checks for spikes
         frequency = 200+200*t;
         sound = 5*(float)(Math.pow(Math.sin(2*Math.PI*frequency*t), 3));
         int N = x.length;
         for (int n=0; n<N; n++) {
             x[n] += dt*((sound-x[n])/tau_ear+sigma_ear*(float)(Math.sqrt(2.0/tau_ear))*xi());
+            xrec[n].add(x[n]);
+            if (x[n] > 1) {
+                x[n] = 0; // reset
+                connectionBuffer[n].add(t); // put spike at end of buffer
+            }
         }
     }
 
