@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  * Spike-based adaptation of Licklider's model of pitch processing
@@ -70,7 +71,7 @@ public class LickliderPitch extends Simulation {
         N = 300;
         tau = 1*ms;
         sigma = (float)0.1;
-        duration = 100*ms;
+        duration = 500*ms;
         numsteps = (int)(duration/dt);
         x = new float[2];
         v = new float[N];
@@ -82,8 +83,8 @@ public class LickliderPitch extends Simulation {
         // connection delays
         float[][] delays = new float[2][N];
         Arrays.fill(delays[0], 0);
-        float start = (float)Math.log(max_freq);
-        float end = (float)Math.log(min_freq);
+        float start = (float)Math.log(min_freq);
+        float end = (float)Math.log(max_freq);
         float step = (end-start)/N;
         float logfreq = start;
         for (int n=0; n<N; n++) {
@@ -93,14 +94,14 @@ public class LickliderPitch extends Simulation {
         return delays;
     }
 
-
     float xi() {
-        return (float)(rng.nextGaussian());
+        return (float)(rng.nextGaussian()/Math.sqrt(dt));
     }
 
-    void updateSound(float t, float dt, ArrayList<Float>[] xrec) {
+    void updateSound(int h, float dt) {//, ArrayList<Float>[] xrec) {
         // updates the sound signal and the receptor states
         // checks for spikes
+        float t = h*dt;
         frequency = (float)(200.0+200.0*t);
         sound = (float)(5.0*Math.pow(Math.sin(2.0*Math.PI*frequency*t), 3.0));
         int N = x.length;
@@ -108,9 +109,10 @@ public class LickliderPitch extends Simulation {
             if (xLS[n]+xrefr > t) {
                 x[n] = 0;
             } else {
-                x[n] += dt*((sound-x[n])/tau_ear+sigma_ear*(float)(Math.sqrt(2.0/tau_ear))*xi());
+                x[n] += dt*((sound-x[n])/tau_ear+sigma_ear*(Math.sqrt(2.0/tau_ear))*xi());
+
             }
-            xrec[n].add(x[n]);
+            //xrec[n].add(x[n]);
             if (x[n] > 1) {
                 x[n] = 0; // reset
                 xLS[n] = t;
@@ -119,18 +121,18 @@ public class LickliderPitch extends Simulation {
         }
     }
 
-    void updateNetwork(ArrayList<Float>[] vrec) {
+    void updateNetwork() {//ArrayList<Float>[] vrec) {
         for (int n=0; n<N; n++) {
             v[n] += dt*(-v[n]/tau+sigma*(float)(Math.sqrt(2.0/tau))*xi());
-            vrec[n].add(v[n]);
+            //vrec[n].add(v[n]);
         }
     }
 
-    void propagate(float t) {
+    void propagate(int h, float dt) {
         // propagate appropriate buffer values to receiving network
         // this is rather simple since we have full connectivity so we can skip the destination check
+        float t = h*dt;
         int delay;
-        int h = (int)(t/dt);
         int h_spike;
         for (int n_net=0; n_net<N; n_net++) { // coincidence detectors
             for (int n_rec=0; n_rec<2; n_rec++) { // receptors
@@ -147,17 +149,15 @@ public class LickliderPitch extends Simulation {
                 }
             }
         }
-        /*
         // clean buffers
         for (int n_rec=0; n_rec<2; n_rec++) {
-            for (Float t_spike : connectionBuffer[n_rec]) {
-                h_spike = (int)(t_spike/dt);
-                if (h_spike+maxDelay < h) {
-                    connectionBuffer[n_rec].remove(t_spike);
+            for (Iterator<Float> it = connectionBuffer[n_rec].iterator(); it.hasNext();) {
+                Float t_spike = it.next();
+                if (t_spike+maxDelay < t) {
+                    it.remove();
                 }
             }
         }
-        */
     }
 
     boolean isExternalStorageWritable() {
@@ -179,7 +179,26 @@ public class LickliderPitch extends Simulation {
         return nspikes;
     }
 
+    long displaySimProgress(String simStateOutput, float t, float duration, long startTime, long lastReport) {
+        // we should have progress updates on a separate thread
+        long curTime = System.currentTimeMillis();
+        if (curTime-lastReport > 1e4) {
+            float progressPerc = t/duration;
+            int secsElapsed = (int)((curTime-startTime)/1000);
+            int estSecsRemaining = (int)((secsElapsed/progressPerc)-secsElapsed);
+            String progressString = String.format("\n-- %.1f%% complete\n-- %ds elapsed, approximately %ds remaining ...",
+                    progressPerc*100, secsElapsed, estSecsRemaining);
+            publishProgress(simStateOutput+progressString);
+            return curTime;
+        }
+        return lastReport;
+    }
+
     void saveData(String path, String filename, ArrayList<Float>[] data) {
+        /*
+        Crashes when saving large amounts of data with OutOfMemoryError.
+        Build and write one line at a time to avoid this.
+         */
         StringBuilder datasb = new StringBuilder();
         int dataLen = data.length;
         for (int n=0; n<dataLen; n++) {
@@ -220,27 +239,28 @@ public class LickliderPitch extends Simulation {
         publishProgress(simStateOutput);
         int nspikes = 0;
         ArrayList<Float>[] spikesrec = new ArrayList[N]; // array of arraylist of Float
-        ArrayList<Float>[] xrec = new ArrayList[2];
-        ArrayList<Float>[] vrec = new ArrayList[N]; // array of arraylist of Float
-        for (int n=0; n<2; n++) {
-            xrec[n] = new ArrayList<Float>();
-        }
+        //ArrayList<Float>[] xrec = new ArrayList[2];
+        //ArrayList<Float>[] vrec = new ArrayList[N]; // array of arraylist of Float
+        //for (int n=0; n<2; n++) {
+        //    xrec[n] = new ArrayList<Float>();
+        //}
         for (int n=0; n<N; n++) {
             spikesrec[n] = new ArrayList<Float>();
-            vrec[n] = new ArrayList<Float>();
+            //vrec[n] = new ArrayList<Float>();
         }
 
         float t;
-        int progress;
         long start = System.currentTimeMillis();
         simStateOutput += "Running simulation ...";
         publishProgress(simStateOutput);
+        long lastReport = start;
         for (int h=0; h<numsteps; h++) {
-            publishProgress(simStateOutput+" "+h+"/"+numsteps);
             t = h*dt;
-            updateSound(t, dt, xrec); // loop of 2
-            updateNetwork(vrec); // loop of N (400)
-            propagate(t); // loop of N (400)
+            lastReport = displaySimProgress(simStateOutput, t, duration, start, lastReport);
+            //publishProgress(simStateOutput+" "+t*100/duration+" %");
+            updateSound(h, dt);//, xrec); // loop of 2
+            updateNetwork();//vrec); // loop of N (400)
+            propagate(h, dt); // loop of N (400)
             nspikes = checkSpike(t, nspikes, spikesrec); // loop of N
         }
         long wallClockDura = System.currentTimeMillis()-start;
@@ -253,8 +273,8 @@ public class LickliderPitch extends Simulation {
         if (isExternalStorageWritable()) {
             Log.d("Licklider", "Writing data.");
             saveData("/briandroid.tmp/", "briandroidLicklider.spikes", spikesrec);
-            saveData("/briandroid.tmp/", "briandroidLicklider.v", vrec);
-            saveData("/briandroid.tmp/", "briandroidLicklider.x", xrec);
+            //saveData("/briandroid.tmp/", "briandroidLicklider.v", vrec);
+            //saveData("/briandroid.tmp/", "briandroidLicklider.x", xrec);
         }
         Log.d("Licklider", "DONE!!!");
         simStateOutput += "Done!\n";
