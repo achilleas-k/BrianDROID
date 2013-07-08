@@ -1,12 +1,11 @@
 package org.briansimulator.briandroid.Simulations;
 
-import android.media.AudioFormat;
-import android.media.AudioRecord;
-import android.media.MediaRecorder;
 import android.os.Environment;
 import android.util.Log;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,11 +15,15 @@ import java.util.Iterator;
  * Spike-based adaptation of Licklider's model of pitch processing
  * (autocorrelation with delay lines) with phase locking.
  *
+ * Originally a direct port of the version found in Brian's examples, it
+ * currently reads raw audio files instead. File must be 8-bit unsigned PCM.
+ *
  * Created by achilleas on 19/06/13.
  */
-public class LickliderPitch extends Simulation {
+public class PitchOffline extends Simulation {
+    public String ID = "PitchOffline";
 
-    private static String LOGID = "org.briansimulator.briandroid.LICKLIDERPITCH";
+    private static String LOGID = "org.briansimulator.briandroid.OFFLINEPITCH";
     private String simStateOutput;
 
 
@@ -41,7 +44,6 @@ public class LickliderPitch extends Simulation {
 
     // ear and sound state variables
     float[] x;
-    float sound;
     float frequency;
     float[] xLS; // last spike
     float xrefr;
@@ -53,12 +55,16 @@ public class LickliderPitch extends Simulation {
 
     ArrayList<Float>[] connectionBuffer; // for propagating activity with delays
 
-    public LickliderPitch() {
+    File rawsoundfile;
+    BufferedInputStream soundStream;
+    float[] sound;
+
+    public PitchOffline() {
         setState(0);
     }
 
     public String toString() {
-        return "Licklider model";
+        return "Offline pitch perception";
     }
 
     public void setup() {
@@ -71,12 +77,11 @@ public class LickliderPitch extends Simulation {
         N = 300;
         tau = 1*ms;
         sigma = (float)0.1;
-        duration = 500*ms;
-        numsteps = (int)(duration/dt);
         x = new float[2];
         v = new float[N];
         xLS = new float[2];
         xrefr = 2*ms;
+        loadSound("/briandroid.tmp/sound.raw");
     }
 
     float[][] connect(int N) {
@@ -95,7 +100,35 @@ public class LickliderPitch extends Simulation {
     }
 
     float xi() {
+
         return (float)(rng.nextGaussian()/Math.sqrt(dt));
+    }
+
+    void loadSound(String filepath) {
+        File sdCard = Environment.getExternalStorageDirectory();
+        String fullpath = sdCard.getAbsolutePath()+filepath;
+        try {
+            rawsoundfile = new File(fullpath);
+            long filesize_long = rawsoundfile.length();
+            if (filesize_long > Integer.MAX_VALUE) {
+                Log.d(LOGID, "File is really big!\n"+filesize_long);
+            }
+            int filesize = (int)filesize_long;
+            sound = new float[filesize];
+            soundStream = new BufferedInputStream(new FileInputStream(rawsoundfile));
+            for (int i=0; i < filesize; i++) {
+                int sndbyte = soundStream.read();
+                if (sndbyte == -1) {
+                    // EOF
+                    Log.d(LOGID, "EOF reached while reading file.");
+                    break;
+                }
+                sound[i] = (float)sndbyte/128-1;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(LOGID, "ERROR opening/reading sound file at "+fullpath);
+        }
     }
 
     void updateSound(int h, float dt) {//, ArrayList<Float>[] xrec) {
@@ -103,13 +136,13 @@ public class LickliderPitch extends Simulation {
         // checks for spikes
         float t = h*dt;
         frequency = (float)(200.0+200.0*t);
-        sound = (float)(5.0*Math.pow(Math.sin(2.0*Math.PI*frequency*t), 3.0));
+        //sound = (float)(5.0*Math.pow(Math.sin(2.0*Math.PI*frequency*t), 3.0));
         int N = x.length;
         for (int n=0; n<N; n++) {
             if (xLS[n]+xrefr > t) {
                 x[n] = 0;
             } else {
-                x[n] += dt*((sound-x[n])/tau_ear+sigma_ear*(Math.sqrt(2.0/tau_ear))*xi());
+                x[n] += dt*((15.0*sound[h]-x[n])/tau_ear+sigma_ear*(Math.sqrt(2.0/tau_ear))*xi());
 
             }
             //xrec[n].add(x[n]);
@@ -121,10 +154,11 @@ public class LickliderPitch extends Simulation {
         }
     }
 
-    void updateNetwork() {//ArrayList<Float>[] vrec) {
+    void updateNetwork(ArrayList<Float>[] vrec) {
         for (int n=0; n<N; n++) {
             v[n] += dt*(-v[n]/tau+sigma*(float)(Math.sqrt(2.0/tau))*xi());
-            //vrec[n].add(v[n]);
+            if (n < 2)
+                vrec[n].add(v[n]);
         }
     }
 
@@ -179,15 +213,15 @@ public class LickliderPitch extends Simulation {
         return nspikes;
     }
 
-    long displaySimProgress(String simStateOutput, float t, float duration, long startTime, long lastReport) {
+    long displaySimProgress(String simStateOutput, float t, float duration, long startTime, int nspikes, long lastReport) {
         // we should have progress updates on a separate thread
         long curTime = System.currentTimeMillis();
         if (curTime-lastReport > 1e4) {
             float progressPerc = t/duration;
             int secsElapsed = (int)((curTime-startTime)/1000);
             int estSecsRemaining = (int)((secsElapsed/progressPerc)-secsElapsed);
-            String progressString = String.format("\n-- %.1f%% complete\n-- %ds elapsed, approximately %ds remaining ...",
-                    progressPerc*100, secsElapsed, estSecsRemaining);
+            String progressString = String.format("\n-- %.1f%% complete\n-- %ds elapsed, approximately %ds remaining ...\n-- %d spikes fired so far",
+                    progressPerc*100, secsElapsed, estSecsRemaining, nspikes);
             publishProgress(simStateOutput+progressString);
             return curTime;
         }
@@ -240,26 +274,29 @@ public class LickliderPitch extends Simulation {
         int nspikes = 0;
         ArrayList<Float>[] spikesrec = new ArrayList[N]; // array of arraylist of Float
         //ArrayList<Float>[] xrec = new ArrayList[2];
-        //ArrayList<Float>[] vrec = new ArrayList[N]; // array of arraylist of Float
+        ArrayList<Float>[] vrec = new ArrayList[2]; // array of arraylist of Float
         //for (int n=0; n<2; n++) {
         //    xrec[n] = new ArrayList<Float>();
         //}
         for (int n=0; n<N; n++) {
             spikesrec[n] = new ArrayList<Float>();
-            //vrec[n] = new ArrayList<Float>();
         }
+        vrec[0] = new ArrayList<Float>();
+        vrec[1] = new ArrayList<Float>();
 
         float t;
         long start = System.currentTimeMillis();
         simStateOutput += "Running simulation ...";
         publishProgress(simStateOutput);
         long lastReport = start;
+        numsteps = sound.length;
+        duration = numsteps*dt;
         for (int h=0; h<numsteps; h++) {
             t = h*dt;
-            lastReport = displaySimProgress(simStateOutput, t, duration, start, lastReport);
+            lastReport = displaySimProgress(simStateOutput, t, duration, start, nspikes, lastReport);
             //publishProgress(simStateOutput+" "+t*100/duration+" %");
             updateSound(h, dt);//, xrec); // loop of 2
-            updateNetwork();//vrec); // loop of N (400)
+            updateNetwork(vrec); // loop of N (400)
             propagate(h, dt); // loop of N (400)
             nspikes = checkSpike(t, nspikes, spikesrec); // loop of N
         }
@@ -273,7 +310,7 @@ public class LickliderPitch extends Simulation {
         if (isExternalStorageWritable()) {
             Log.d("Licklider", "Writing data.");
             saveData("/briandroid.tmp/", "briandroidLicklider.spikes", spikesrec);
-            //saveData("/briandroid.tmp/", "briandroidLicklider.v", vrec);
+            saveData("/briandroid.tmp/", "briandroidLicklider.v", vrec);
             //saveData("/briandroid.tmp/", "briandroidLicklider.x", xrec);
         }
         Log.d("Licklider", "DONE!!!");
@@ -283,49 +320,5 @@ public class LickliderPitch extends Simulation {
         return;
     }
 
-    public void record() {
-        setState(1);
-        int minBufferSize = AudioRecord.getMinBufferSize(44100, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 
-        AudioRecord micRec = new AudioRecord(MediaRecorder.AudioSource.MIC, // microphone
-                44100, // sampling rate (default 44100 for max compatibility)
-                AudioFormat.CHANNEL_IN_MONO, // max compatibility
-                AudioFormat.ENCODING_PCM_16BIT, // 8 or 16 bit
-                4096); //1048576);                       // buffer size in bytes
-        micRec.startRecording();
-        byte[] audioBytes = new byte[4096];
-        int bytesRead;
-        ArrayList<Integer> audioData = new ArrayList<Integer>();
-        long start = System.currentTimeMillis();
-        while (System.currentTimeMillis()-start < 5000) {
-            bytesRead = micRec.read(audioBytes, 0, 4096);
-            for (byte b : audioBytes) {
-                audioData.add((int)b);
-            }
-            publishProgress("RAW DATA: " + Arrays.toString(audioBytes) +
-                    "\nBytes: " + bytesRead +
-                    "\nMin buffer size: " + minBufferSize);
-            try {
-                //Thread.sleep(100);
-            } catch (Exception e) {
-                Log.e(LOGID, "Exception thrown during sleep. ");
-                e.printStackTrace();
-            }
-        }
-        try{
-            File sdCard = Environment.getExternalStorageDirectory();
-            File dir = new File(sdCard.getAbsolutePath()+"/briandroid.tmp/"); //TODO: optional save path
-            dir.mkdirs();
-            String audioFilename = "audio.raw";
-            File audioFile = new File(dir, audioFilename);
-            FileOutputStream streamWriter = new FileOutputStream(audioFile);
-            streamWriter.write(audioData.toString().getBytes()); // I'm aware of how ridiculous this is
-            streamWriter.close();
-        } catch (Exception e) {
-            Log.e(LOGID, "Exception thrown while writing file");
-            e.printStackTrace();
-        }
-        publishProgress("ALL DONE!");
-        setState(2);
-    }
 }

@@ -13,6 +13,8 @@ import java.util.List;
  * Created by achilleas on 19/06/13.
  */
 public class CUBA extends Simulation {
+    public final String ID = "CUBA";
+
     int N;
     int Ne;
     int Ni;

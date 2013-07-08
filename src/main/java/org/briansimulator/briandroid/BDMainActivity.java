@@ -38,10 +38,10 @@ public class BDMainActivity extends Activity {
 
     }
 
-    public void startSimulationActivity(String sim) {
+    public void startSimulationActivity(String simID) {
         // Send simulation object to the detail activity
         Intent simulationIntent = new Intent(this, SimulationActivity.class);
-        simulationIntent.putExtra(EXTRA_MESSAGE, sim);
+        simulationIntent.putExtra(EXTRA_MESSAGE, simID);
         startActivity(simulationIntent);
     }
 
@@ -50,7 +50,7 @@ public class BDMainActivity extends Activity {
         // Currently the list is hardcoded since the class files are built into the app
         //File simulationDir = new File("Simulations");
         //simList = simulationDir.list();
-        String[] list = {"COBA", "CUBA", "Licklider (pitch)"};
+        String[] list = {"COBA", "CUBA", "PitchOffline", "PitchOnline"};
         return list;
     }
 }

@@ -16,7 +16,8 @@ import android.widget.Toast;
 
 import org.briansimulator.briandroid.Simulations.COBA;
 import org.briansimulator.briandroid.Simulations.CUBA;
-import org.briansimulator.briandroid.Simulations.LickliderPitch;
+import org.briansimulator.briandroid.Simulations.PitchOnline;
+import org.briansimulator.briandroid.Simulations.PitchOffline;
 import org.briansimulator.briandroid.Simulations.Simulation;
 
 public class SimulationActivity extends Activity {
@@ -58,19 +59,24 @@ public class SimulationActivity extends Activity {
 
     };
 
-    void initSimulation(String name) {
-        if (name.equals("COBA")) {
+    void initSimulation(String ID) {
+        if (ID.equals("COBA")) {
             theSim = new COBA();
             theSim.setup();
             theSim.setProgressView(statusText);
             Toast.makeText(toastContext, "Loaded simulation "+theSim.toString(), Toast.LENGTH_LONG).show();
-        } else if (name.equals("CUBA")) {
+        } else if (ID.equals("CUBA")) {
             theSim = new CUBA();
             theSim.setup();
             theSim.setProgressView(statusText);
             Toast.makeText(toastContext, "Loaded simulation "+theSim.toString(), Toast.LENGTH_LONG).show();
-        } else if (name.contains("Licklider")) {
-            theSim = new LickliderPitch();
+        } else if (ID.equals("OFFLINEPITCH")) {
+            theSim = new PitchOffline();
+            theSim.setup();
+            theSim.setProgressView(statusText);
+            Toast.makeText(toastContext, "Loaded simulation "+theSim.toString(), Toast.LENGTH_LONG).show();
+        }  else if (ID.equals("ONLINEPITCH")) {
+            theSim = new PitchOnline();
             theSim.setup();
             theSim.setProgressView(statusText);
             Toast.makeText(toastContext, "Loaded simulation "+theSim.toString(), Toast.LENGTH_LONG).show();

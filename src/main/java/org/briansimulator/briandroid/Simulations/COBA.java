@@ -38,6 +38,7 @@ import java.util.List;
  *
  */
 public class COBA extends Simulation {
+    public final String ID = "COBA";
 
     String simStateOutput;
     // parameters
