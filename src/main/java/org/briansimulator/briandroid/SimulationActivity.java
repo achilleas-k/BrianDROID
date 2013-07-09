@@ -70,12 +70,12 @@ public class SimulationActivity extends Activity {
             theSim.setup();
             theSim.setProgressView(statusText);
             Toast.makeText(toastContext, "Loaded simulation "+theSim.toString(), Toast.LENGTH_LONG).show();
-        } else if (ID.equals("OFFLINEPITCH")) {
+        } else if (ID.equals("PitchOffline")) {
             theSim = new PitchOffline();
             theSim.setup();
             theSim.setProgressView(statusText);
             Toast.makeText(toastContext, "Loaded simulation "+theSim.toString(), Toast.LENGTH_LONG).show();
-        }  else if (ID.equals("ONLINEPITCH")) {
+        }  else if (ID.equals("PitchOnline")) {
             theSim = new PitchOnline();
             theSim.setup();
             theSim.setProgressView(statusText);
