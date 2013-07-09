@@ -50,30 +50,28 @@ public class PitchOnline extends Simulation {
 
     public void run() {
         setState(1);
-        int minBufferSize = AudioRecord.getMinBufferSize(44100, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_8BIT);
+        int minBufferSize = AudioRecord.getMinBufferSize(44100, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 
         AudioRecord micRec = new AudioRecord(MediaRecorder.AudioSource.MIC, // microphone
                 44100, // sampling rate (default 44100 for max compatibility)
                 AudioFormat.CHANNEL_IN_MONO, // max compatibility
-                AudioFormat.ENCODING_PCM_8BIT, // 8 or 16 bit
-                4096); //1048576);                       // buffer size in bytes
+                AudioFormat.ENCODING_PCM_16BIT, // 8 or 16 bit
+                40960);                       // buffer size in bytes
         micRec.startRecording();
         byte[] audioBytes = new byte[4096];
-        int bytesRead;
+        int bytesRead = 0;
         ArrayList<Integer> audioData = new ArrayList<Integer>();
+        publishProgress("Running ...");
         long start = System.currentTimeMillis();
         while (System.currentTimeMillis()-start < 5000) {
-            // do nothing
-            publishProgress("STILL A WIP. Exiting...");
-            if (true)
-                break;
-            bytesRead = micRec.read(audioBytes, 0, 4096);
+            bytesRead += micRec.read(audioBytes, 0, 4096);
+            publishProgress("Running ...\n"+bytesRead+" bytes read.");
             for (byte b : audioBytes) {
                 audioData.add((int)b);
             }
-            publishProgress("RAW DATA: " + Arrays.toString(audioBytes) +
-                    "\nBytes: " + bytesRead +
-                    "\nMin buffer size: " + minBufferSize);
+            //publishProgress("RAW DATA: " + Arrays.toString(audioBytes) +
+            //        "\nBytes: " + bytesRead +
+            //        "\nMin buffer size: " + minBufferSize);
             try {
                 //Thread.sleep(100);
             } catch (Exception e) {
@@ -81,6 +79,8 @@ public class PitchOnline extends Simulation {
                 e.printStackTrace();
             }
         }
+        micRec.release();
+        publishProgress("Recording stopped.\nTotal bytes read: "+bytesRead+"\nSaving ...");
         try{
             File sdCard = Environment.getExternalStorageDirectory();
             File dir = new File(sdCard.getAbsolutePath()+"/briandroid.tmp/"); //TODO: optional save path
@@ -88,7 +88,8 @@ public class PitchOnline extends Simulation {
             String audioFilename = "audio.raw";
             File audioFile = new File(dir, audioFilename);
             FileOutputStream streamWriter = new FileOutputStream(audioFile);
-            streamWriter.write(audioData.toString().getBytes()); // I'm aware of how ridiculous this is
+            for (Integer ad : audioData)
+                streamWriter.write(ad);
             streamWriter.close();
         } catch (Exception e) {
             Log.e(LOGID, "Exception thrown while writing file");
