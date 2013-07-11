@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  * Online version of PitchOffline.java
@@ -24,6 +25,38 @@ public class PitchOnline extends Simulation {
 
     private static String LOGID = "org.briansimulator.briandroid.ONLINEPITCH";
 
+    private String simStateOutput;
+
+
+    int samplingRate;
+    int bufferSize;
+    int soundChunkSize;
+    float dt;
+    float maxDelay;
+    float tau_ear;
+    float sigma_ear;
+    float min_freq;
+    float max_freq;
+
+    int N;
+    float tau;
+    float sigma;
+
+    // ear and sound state variables
+    float[] x;
+    float frequency;
+    float[] xLS; // last spike
+    float xrefr;
+
+    // coincidence detectors state variables
+    float[] v;
+
+    float[][] delays;
+
+    ArrayList<Float>[] connectionBuffer; // for propagating activity with delays
+
+    short[] sound;
+
     public PitchOnline() {
         setState(0);
     }
@@ -33,69 +66,265 @@ public class PitchOnline extends Simulation {
     }
 
     public void setup() {
-    //    dt = (float)0.02*ms;
-    //    maxDelay = 22*ms;
-    //    tau_ear = 1*ms;
-    //    sigma_ear = (float)0.1;
-    //    min_freq = 50;
-    //    max_freq = 1000;
-    //    N = 300;
-    //    tau = 1*ms;
-    //    sigma = (float)0.1;
-    //    x = new float[2];
-    //    v = new float[N];
-    //    xLS = new float[2];
-    //    xrefr = 2*ms;
+        samplingRate = 44100;
+        bufferSize = samplingRate; // 1 second buffer
+        soundChunkSize = (int)(10*ms*samplingRate);
+        dt = (float)(1.0/samplingRate);
+        maxDelay = 22*ms;
+        tau_ear = 1*ms;
+        sigma_ear = (float)0.1;
+        min_freq = 50;
+        max_freq = 1000;
+        N = 300;
+        tau = 1*ms;
+        sigma = (float)0.1;
+        x = new float[2];
+        v = new float[N];
+        xLS = new float[2];
+        xrefr = 2*ms;
+        sound = new short[soundChunkSize];
+    }
+
+    float[][] connect(int N) {
+        // connection delays
+        float[][] delays = new float[2][N];
+        Arrays.fill(delays[0], 0);
+        float start = (float)Math.log(min_freq);
+        float end = (float)Math.log(max_freq);
+        float step = (end-start)/N;
+        float logfreq = start;
+        for (int n=0; n<N; n++) {
+            delays[1][n] = (float)(1.0/Math.exp(logfreq));
+            logfreq += step;
+        }
+        return delays;
+    }
+
+    float xi() {
+
+        return (float)(rng.nextGaussian()/Math.sqrt(dt));
+    }
+
+    void updateReceptors(float t, float dt, float sndSample) {
+        // updates the receptor states
+        // checks for spikes
+        frequency = (float)(200.0+200.0*t);
+        //sound = (float)(5.0*Math.pow(Math.sin(2.0*Math.PI*frequency*t), 3.0));
+        int N = x.length;
+        for (int n=0; n<N; n++) {
+            if (xLS[n]+xrefr > t) {
+                x[n] = 0;
+            } else {
+                x[n] += dt*((15.0*sndSample-x[n])/tau_ear+sigma_ear*(Math.sqrt(2.0/tau_ear))*xi());
+            }
+            //xrec[n].add(x[n]);
+            if (x[n] > 1) {
+                x[n] = 0; // reset
+                xLS[n] = t;
+                connectionBuffer[n].add(t); // put spike at end of buffer
+            }
+        }
+    }
+
+    void updateNetwork(float dt) {
+        for (int n=0; n<N; n++) {
+            v[n] += dt*(-v[n]/tau+sigma*(float)(Math.sqrt(2.0/tau))*xi());
+        }
+    }
+
+    void propagate(float t, float dt) {
+        // propagate appropriate buffer values to receiving network
+        // this is rather simple since we have full connectivity so we can skip the destination check
+        for (int n_net=0; n_net<N; n_net++) { // coincidence detectors
+            for (int n_rec=0; n_rec<2; n_rec++) { // receptors
+                float delay = delays[n_rec][n_net];
+                for (Float t_spike : connectionBuffer[n_rec]) {
+                    if ((t_spike+delay > t-dt) & (t_spike+delay < t+dt)) {
+                        v[n_net] += 0.5; // weight = 0.5
+                    }/* else if (h_spike+delay > h) {
+                        // buffers are sorted/sequential, so there's no need to keep
+                        // searching after t
+                        break;
+                    }*/
+                }
+            }
+        }
+        // clean buffers
+        for (int n_rec=0; n_rec<2; n_rec++) {
+            for (Iterator<Float> it = connectionBuffer[n_rec].iterator(); it.hasNext();) {
+                Float t_spike = it.next();
+                if (t_spike+maxDelay < t) {
+                    it.remove();
+                }
+            }
+        }
+    }
+
+    boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+
+    int checkSpike(float t, int nspikes, ArrayList<Float>[] spikesrec) {
+        for (int n=0; n<N; n++) {
+            if (v[n] > 1) { // threshold = 1
+                spikesrec[n].add(t);
+                nspikes++;
+                v[n] = 0; // reset
+            }
+        }
+        return nspikes;
+    }
+
+    long displaySimProgress(String simStateOutput, float t, float duration, long startTime, int nspikes, long lastReport) {
+        // we should have progress updates on a separate thread
+        long curTime = System.currentTimeMillis();
+        if (curTime-lastReport > 1e4) {
+            float progressPerc = t/duration;
+            int secsElapsed = (int)((curTime-startTime)/1000);
+            int estSecsRemaining = (int)((secsElapsed/progressPerc)-secsElapsed);
+            String progressString = String.format("\n-- %.1f%% complete\n-- %ds elapsed, approximately %ds remaining ...\n-- %d spikes fired so far",
+                    progressPerc*100, secsElapsed, estSecsRemaining, nspikes);
+            publishProgress(simStateOutput+progressString);
+            return curTime;
+        }
+        return lastReport;
+    }
+
+    void saveData(String path, String filename, ArrayList<Float> data) {
+        /*
+        Crashes when saving large amounts of data with OutOfMemoryError.
+        Build and write one line at a time to avoid this.
+         */
+        StringBuilder datasb = new StringBuilder();
+        for (float value : data) {
+            datasb.append(value+" ");
+        }
+        datasb.append("\n");
+        try {
+            File sdCard = Environment.getExternalStorageDirectory();
+            File dir = new File(sdCard.getAbsolutePath()+path);
+            dir.mkdirs();
+            File savefile = new File(dir, filename);
+            FileOutputStream savestream = new FileOutputStream(savefile);
+            savestream.write(datasb.toString().getBytes());
+            savestream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    void saveData(String path, String filename, ArrayList<Float>[] data) {
+        /*
+        Crashes when saving large amounts of data with OutOfMemoryError.
+        Build and write one line at a time to avoid this.
+         */
+        StringBuilder datasb = new StringBuilder();
+        int dataLen = data.length;
+        for (int n=0; n<dataLen; n++) {
+            for (float value : data[n]) {
+                datasb.append(value+" ");
+            }
+            datasb.append("\n");
+        }
+        try {
+            File sdCard = Environment.getExternalStorageDirectory();
+            File dir = new File(sdCard.getAbsolutePath()+path);
+            dir.mkdirs();
+            File savefile = new File(dir, filename);
+            FileOutputStream savestream = new FileOutputStream(savefile);
+            savestream.write(datasb.toString().getBytes());
+            savestream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    float squashSound(short sound) {
+        return (float)sound/Short.MAX_VALUE;
     }
 
     public void run() {
         setState(1);
-        int minBufferSize = AudioRecord.getMinBufferSize(44100, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+        simStateOutput = "Setting up simulation ...\n";
+        publishProgress(simStateOutput);
+        Arrays.fill(x, 0);
+        Arrays.fill(v, 0);
+        Arrays.fill(xLS, -xrefr);
+        connectionBuffer = new ArrayList[2];
+        connectionBuffer[0] = new ArrayList<Float>();
+        connectionBuffer[1] = new ArrayList<Float>();
+
+        simStateOutput += "Generating connection matrix ...\n";
+        publishProgress(simStateOutput);
+        delays = connect(N);
+
+        simStateOutput += "Setting up monitors ...\n";
+        publishProgress(simStateOutput);
+        int nspikes = 0;
+        ArrayList<Float>[] spikesrec = new ArrayList[N]; // array of arraylist of Float
+        //ArrayList<Float>[] xrec = new ArrayList[2];
+        //ArrayList<Float>[] vrec = new ArrayList[2]; // array of arraylist of Float
+        //for (int n=0; n<2; n++) {
+        //    xrec[n] = new ArrayList<Float>();
+        //}
+        for (int n=0; n<N; n++) {
+            spikesrec[n] = new ArrayList<Float>();
+        }
+
+        float t;
+        long start = System.currentTimeMillis();
+        simStateOutput += "Running simulation ...";
+        publishProgress(simStateOutput);
 
         AudioRecord micRec = new AudioRecord(MediaRecorder.AudioSource.MIC, // microphone
-                44100, // sampling rate (default 44100 for max compatibility)
+                samplingRate,
                 AudioFormat.CHANNEL_IN_MONO, // max compatibility
                 AudioFormat.ENCODING_PCM_16BIT, // 8 or 16 bit
-                40960);                       // buffer size in bytes
+                bufferSize);
+        ArrayList<Float> soundHistory = new ArrayList<Float>();
         micRec.startRecording();
-        byte[] audioBytes = new byte[4096];
-        int bytesRead = 0;
-        ArrayList<Integer> audioData = new ArrayList<Integer>();
-        publishProgress("Running ...");
-        long start = System.currentTimeMillis();
-        while (System.currentTimeMillis()-start < 5000) {
-            bytesRead += micRec.read(audioBytes, 0, 4096);
-            publishProgress("Running ...\n"+bytesRead+" bytes read.");
-            for (byte b : audioBytes) {
-                audioData.add((int)b);
+        int samplesRead = 0;
+        int H = 0;
+        while (System.currentTimeMillis()-start < 20000) {
+            samplesRead = micRec.read(sound, 0, soundChunkSize);
+            if (samplesRead != soundChunkSize) {
+                Log.w(LOGID, "WARNING: Sound buffer was not filled");
             }
-            //publishProgress("RAW DATA: " + Arrays.toString(audioBytes) +
-            //        "\nBytes: " + bytesRead +
-            //        "\nMin buffer size: " + minBufferSize);
-            try {
-                //Thread.sleep(100);
-            } catch (Exception e) {
-                Log.e(LOGID, "Exception thrown during sleep. ");
-                e.printStackTrace();
+            for (int h=0; h<samplesRead; h++, H++) {
+                t = H*dt;
+                //lastReport = displaySimProgress(simStateOutput, t, duration, start, nspikes, lastReport);
+                //publishProgress(simStateOutput+" "+t*100/duration+" %");
+                float fltsnd = squashSound(sound[h]);
+                updateReceptors(t, dt, fltsnd); // loop of 2
+                updateNetwork(dt); // loop of N (400)
+                propagate(t, dt); // loop of N (400)
+                nspikes = checkSpike(t, nspikes, spikesrec); // loop of N
+                soundHistory.add(fltsnd);
             }
         }
         micRec.release();
-        publishProgress("Recording stopped.\nTotal bytes read: "+bytesRead+"\nSaving ...");
-        try{
-            File sdCard = Environment.getExternalStorageDirectory();
-            File dir = new File(sdCard.getAbsolutePath()+"/briandroid.tmp/"); //TODO: optional save path
-            dir.mkdirs();
-            String audioFilename = "audio.raw";
-            File audioFile = new File(dir, audioFilename);
-            FileOutputStream streamWriter = new FileOutputStream(audioFile);
-            for (Integer ad : audioData)
-                streamWriter.write(ad);
-            streamWriter.close();
-        } catch (Exception e) {
-            Log.e(LOGID, "Exception thrown while writing file");
-            e.printStackTrace();
+        long wallClockDura = System.currentTimeMillis()-start;
+        simStateOutput += "\nSimulation done.\nTime taken: "+wallClockDura+" ms \n";
+        publishProgress(simStateOutput);
+        simStateOutput += "Total spikes fired: "+nspikes+"\n";
+        simStateOutput += "Total samples processed: "+soundHistory.size();
+        simStateOutput += "Writing file(s) ...\n";
+        publishProgress(simStateOutput);
+        // save file with data
+        if (isExternalStorageWritable()) {
+            Log.d("Licklider", "Writing data.");
+            saveData("/briandroid.tmp/", "pitchOnline.spikes", spikesrec);
+            saveData("/briandroid.tmp/", "pitchOnline.sound", soundHistory);
         }
-        publishProgress("ALL DONE!");
+        Log.d("Licklider", "DONE!!!");
+        simStateOutput += "Done!\n";
+        publishProgress(simStateOutput);
         setState(2);
+        return;
     }
+
 }
