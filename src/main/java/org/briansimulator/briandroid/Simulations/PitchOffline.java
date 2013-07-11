@@ -154,7 +154,7 @@ public class PitchOffline extends Simulation {
         }
     }
 
-    void updateNetwork(ArrayList<Float>[] vrec) {
+    void updateNetwork(float dt, ArrayList<Float>[] vrec) {
         for (int n=0; n<N; n++) {
             v[n] += dt*(-v[n]/tau+sigma*(float)(Math.sqrt(2.0/tau))*xi());
             if (n < 2)
@@ -245,10 +245,10 @@ public class PitchOffline extends Simulation {
             File sdCard = Environment.getExternalStorageDirectory();
             File dir = new File(sdCard.getAbsolutePath()+path);
             dir.mkdirs();
-            File spikesFile = new File(dir, filename);
-            FileOutputStream spikesStream = new FileOutputStream(spikesFile);
-            spikesStream.write(datasb.toString().getBytes());
-            spikesStream.close();
+            File savefile = new File(dir, filename);
+            FileOutputStream savestream = new FileOutputStream(savefile);
+            savestream.write(datasb.toString().getBytes());
+            savestream.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -296,7 +296,7 @@ public class PitchOffline extends Simulation {
             lastReport = displaySimProgress(simStateOutput, t, duration, start, nspikes, lastReport);
             //publishProgress(simStateOutput+" "+t*100/duration+" %");
             updateSound(h, dt);//, xrec); // loop of 2
-            updateNetwork(vrec); // loop of N (400)
+            updateNetwork(dt, vrec); // loop of N (400)
             propagate(h, dt); // loop of N (400)
             nspikes = checkSpike(t, nspikes, spikesrec); // loop of N
         }
