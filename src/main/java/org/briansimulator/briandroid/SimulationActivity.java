@@ -61,22 +61,22 @@ public class SimulationActivity extends Activity {
 
     void initSimulation(String ID) {
         if (ID.equals("COBA")) {
-            theSim = new COBA();
+            theSim = new COBA(this);
             theSim.setup();
             theSim.setProgressView(statusText);
             Toast.makeText(toastContext, "Loaded simulation "+theSim.toString(), Toast.LENGTH_LONG).show();
         } else if (ID.equals("CUBA")) {
-            theSim = new CUBA();
+            theSim = new CUBA(this);
             theSim.setup();
             theSim.setProgressView(statusText);
             Toast.makeText(toastContext, "Loaded simulation "+theSim.toString(), Toast.LENGTH_LONG).show();
         } else if (ID.equals("PitchOffline")) {
-            theSim = new PitchOffline();
+            theSim = new PitchOffline(this);
             theSim.setup();
             theSim.setProgressView(statusText);
             Toast.makeText(toastContext, "Loaded simulation "+theSim.toString(), Toast.LENGTH_LONG).show();
         }  else if (ID.equals("PitchOnline")) {
-            theSim = new PitchOnline();
+            theSim = new PitchOnline(this);
             theSim.setup();
             theSim.setProgressView(statusText);
             Toast.makeText(toastContext, "Loaded simulation "+theSim.toString(), Toast.LENGTH_LONG).show();

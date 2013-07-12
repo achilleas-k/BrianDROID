@@ -8,8 +8,9 @@ import java.util.Random;
 /**
  * Abstract Simulation class. All simulations should implement this class and
  * override the run() and setup() methods.
- * Created by achilleas on 14/06/13.
  *
+ *
+ * Created by achilleas on 14/06/13.
  *
  */
 public abstract class Simulation extends AsyncTask<Void, String, Void> {

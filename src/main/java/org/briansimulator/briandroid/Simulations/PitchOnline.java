@@ -6,6 +6,8 @@ import android.media.MediaRecorder;
 import android.os.Environment;
 import android.util.Log;
 
+import org.briansimulator.briandroid.SimulationActivity;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -21,12 +23,12 @@ import java.util.Iterator;
  * Created by achilleas on 08/07/13.
  */
 public class PitchOnline extends Simulation {
+    public SimulationActivity simActivity;
     public String ID = "PitchOnline";
 
     private static String LOGID = "org.briansimulator.briandroid.ONLINEPITCH";
 
     private String simStateOutput;
-
 
     int samplingRate;
     int bufferSize;
@@ -57,7 +59,8 @@ public class PitchOnline extends Simulation {
 
     short[] sound;
 
-    public PitchOnline() {
+    public PitchOnline(SimulationActivity sa) {
+        simActivity = sa;
         setState(0);
     }
 
