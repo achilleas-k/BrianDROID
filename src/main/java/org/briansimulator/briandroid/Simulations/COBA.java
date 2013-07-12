@@ -43,6 +43,7 @@ public class COBA extends Simulation {
     public SimulationActivity simActivity;
 
     public final String ID = "COBA";
+    private static String LOGID = "org.briansimulator.briandroid.COBA";
 
     String simStateOutput;
     // parameters
