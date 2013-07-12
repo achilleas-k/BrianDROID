@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.briansimulator.briandroid.Simulations.COBA;
+import org.briansimulator.briandroid.Simulations.COBArs;
 import org.briansimulator.briandroid.Simulations.CUBA;
 import org.briansimulator.briandroid.Simulations.PitchOnline;
 import org.briansimulator.briandroid.Simulations.PitchOffline;
@@ -77,6 +78,11 @@ public class SimulationActivity extends Activity {
             Toast.makeText(toastContext, "Loaded simulation "+theSim.toString(), Toast.LENGTH_LONG).show();
         }  else if (ID.equals("PitchOnline")) {
             theSim = new PitchOnline(this);
+            theSim.setup();
+            theSim.setProgressView(statusText);
+            Toast.makeText(toastContext, "Loaded simulation "+theSim.toString(), Toast.LENGTH_LONG).show();
+        }  else if (ID.equals("COBArs")) {
+            theSim = new COBArs(this);
             theSim.setup();
             theSim.setProgressView(statusText);
             Toast.makeText(toastContext, "Loaded simulation "+theSim.toString(), Toast.LENGTH_LONG).show();
