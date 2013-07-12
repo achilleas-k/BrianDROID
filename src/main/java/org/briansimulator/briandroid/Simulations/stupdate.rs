@@ -14,8 +14,7 @@ typedef struct StateVars {
 void init() {}
 NrnState *neurons;
 
-void root() {
-
+int root() {
     for (int n=0; n<numNeurons; n++) {
         float v = neurons[n].v;
         float ge = neurons[n].ge;
@@ -33,12 +32,5 @@ void setStateVars(NrnState *Sin) {
     neurons = Sin;
 }
 
-void setNumNeurons(int N) {
-    numNeurons = N;
-}
-
-void setTimeStep(float timestep) {
-    dt = timestep;
-}
 
 // use rsForEach
