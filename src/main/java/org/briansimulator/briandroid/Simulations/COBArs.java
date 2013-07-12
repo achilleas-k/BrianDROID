@@ -3,7 +3,6 @@ package org.briansimulator.briandroid.Simulations;
 import android.R;
 import android.os.Environment;
 import android.renderscript.Allocation;
-import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.util.Log;
 
@@ -87,7 +86,10 @@ public class COBArs extends Simulation {
     private void createScript() {
         mRS = RenderScript.create(simActivity.getApplicationContext());
 
-        mScript = new ScriptC_stupdate(mRS, getResources(), R.raw.stupdate);
+        mScript = new ScriptC_stupdate(mRS, simActivity.getResources(),
+                org.briansimulator.briandroid.R.raw.stupdate);
+        mScript.set_numNeurons(N);
+        mScript.set_dt(dt);
     }
 
     static int getBinomial(int n, float p) {
