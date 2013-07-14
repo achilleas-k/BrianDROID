@@ -1,6 +1,5 @@
 package org.briansimulator.briandroid.Simulations;
 
-import android.R;
 import android.os.Environment;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
@@ -29,6 +28,9 @@ public class COBArs extends Simulation {
     Allocation vPointer;
     Allocation gePointer;
     Allocation giPointer;
+
+    Allocation vin;
+    Allocation vout;
 
     String simStateOutput;
     // parameters
@@ -100,6 +102,9 @@ public class COBArs extends Simulation {
         mScript.bind_v(vPointer);
         mScript.bind_ge(gePointer);
         mScript.bind_gi(giPointer);
+
+        vin = Allocation.createSized(mRS, Element.I32(mRS), 1);
+        vout = Allocation.createSized(mRS, Element.I32(mRS), 1);
     }
 
     static int getBinomial(int n, float p) {
@@ -129,8 +134,11 @@ public class COBArs extends Simulation {
     }
 
     static int[] randSample(int[] population, int k) {
-        int[] shuffled = shuffle(population);
-        return Arrays.copyOfRange(shuffled, 0, k);
+        //int[] shuffled = shuffle(population);
+        //return Arrays.copyOfRange(shuffled, 0, k);
+        int[] firstk = new int[k];
+        for (int i=0; i<k; i++) firstk[i] = population[i];
+        return firstk;
     }
 
     public boolean isExternalStorageWritable() {
@@ -150,7 +158,8 @@ public class COBArs extends Simulation {
             population[i]=i;
         }
         for (int i=0; i<N; i++) {
-            int k = getBinomial(N, p);
+            //int k = getBinomial(N, p);
+            int k = (int)(N*p);
             int[] a = randSample(population, k);
             Arrays.sort(a);
             W.add(a);
@@ -207,7 +216,7 @@ public class COBArs extends Simulation {
             gePointer.copyFrom(ge);
             giPointer.copyFrom(gi);
             ArrayList<Integer> spikes_t = new ArrayList<Integer>(); // spikes for time t
-            mScript.forEach_root(null, null);
+            mScript.forEach_root(vin, vout);
             for (int n=0; n<N; n++) {
                 // spike check
                 if (v[n] > Vt) {
