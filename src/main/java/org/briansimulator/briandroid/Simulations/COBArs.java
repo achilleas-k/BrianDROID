@@ -64,7 +64,6 @@ public class COBArs extends Simulation {
 
     @Override
     public void setup() {
-        // TODO: accept some sort of configuration object for dynamically setting up the parameters and simulation
         // parameters
         N = 4000;
         Ne = (int)(N*0.8);
@@ -105,32 +104,6 @@ public class COBArs extends Simulation {
 
         vin = Allocation.createSized(mRS, Element.I32(mRS), 1);
         vout = Allocation.createSized(mRS, Element.I32(mRS), 1);
-    }
-
-    static int getBinomial(int n, float p) {
-        // very crude
-        // could also use apache commons library if it will make our lives easier
-        int x = 0;
-        for(int i = 0; i < n; i++) {
-            if(Math.random() < p)
-                x++;
-        }
-        return x;
-    }
-
-    static int[] shuffle(int[] anArray) {
-        // we could use Collections to automatically shuffle, but I'd rather
-        // stick with primitives if I can (at least for now)
-        int[] shuffled = anArray.clone();
-        int len = shuffled.length;
-        int r, tmp;
-        for (int max=len-1; max>0; max--) {
-            r = rng.nextInt(max);
-            tmp = shuffled[max];
-            shuffled[max] = shuffled[r];
-            shuffled[r] = tmp;
-        }
-        return shuffled;
     }
 
     static int[] randSample(int[] population, int k) {

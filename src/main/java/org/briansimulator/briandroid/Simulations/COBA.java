@@ -100,7 +100,6 @@ public class COBA extends Simulation {
 
     }
 
-
     static int getBinomial(int n, float p) {
         // very crude
         // could also use apache commons library if it will make our lives easier
