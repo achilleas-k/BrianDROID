@@ -70,8 +70,8 @@ public class PitchOnline extends Simulation {
 
     public void setup() {
         samplingRate = 44100;
-        bufferSize = samplingRate; // 1 second buffer
-        soundChunkSize = (int)(10*ms*samplingRate);
+        bufferSize = 2*samplingRate;
+        soundChunkSize = (int)(1000*ms*samplingRate);
         dt = (float)(1.0/samplingRate);
         maxDelay = 22*ms;
         tau_ear = 1*ms;
@@ -290,17 +290,24 @@ public class PitchOnline extends Simulation {
                 bufferSize);
         ArrayList<Float> soundHistory = new ArrayList<Float>();
         micRec.startRecording();
-        int samplesRead = 0;
+        int samplesRead;
+        int totSamplesRead = 0;
         int H = 0;
-        while (System.currentTimeMillis()-start < 20000) {
+        while (totSamplesRead < soundChunkSize*4) {
+            simStateOutput += "\nRecording ...\n";
+            publishProgress(simStateOutput);
             samplesRead = micRec.read(sound, 0, soundChunkSize);
+            totSamplesRead += samplesRead;
             if (samplesRead != soundChunkSize) {
                 Log.w(LOGID, "WARNING: Sound buffer was not filled");
             }
+            simStateOutput += "Read "+samplesRead+" samples, processing ...";
+            publishProgress(simStateOutput);
             for (int h=0; h<samplesRead; h++, H++) {
                 t = H*dt;
-                //lastReport = displaySimProgress(simStateOutput, t, duration, start, nspikes, lastReport);
-                //publishProgress(simStateOutput+" "+t*100/duration+" %");
+                float progress = (float)h/samplesRead*100;
+                if (progress % 10 == 0)
+                    publishProgress(simStateOutput+" "+progress+" %");
                 float fltsnd = squashSound(sound[h]);
                 updateReceptors(t, dt, fltsnd); // loop of 2
                 updateNetwork(dt); // loop of N (400)
@@ -308,13 +315,15 @@ public class PitchOnline extends Simulation {
                 nspikes = checkSpike(t, nspikes, spikesrec); // loop of N
                 soundHistory.add(fltsnd);
             }
+            simStateOutput += "Done.\n";
+            publishProgress(simStateOutput);
         }
         micRec.release();
         long wallClockDura = System.currentTimeMillis()-start;
         simStateOutput += "\nSimulation done.\nTime taken: "+wallClockDura+" ms \n";
         publishProgress(simStateOutput);
         simStateOutput += "Total spikes fired: "+nspikes+"\n";
-        simStateOutput += "Total samples processed: "+soundHistory.size();
+        simStateOutput += "Total samples processed: "+soundHistory.size()+"\n";
         simStateOutput += "Writing file(s) ...\n";
         publishProgress(simStateOutput);
         // save file with data
