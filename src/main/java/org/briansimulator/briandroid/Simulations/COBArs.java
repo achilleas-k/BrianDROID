@@ -1,6 +1,9 @@
 package org.briansimulator.briandroid.Simulations;
 
 import android.os.Environment;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
 import android.util.Log;
 
 import org.briansimulator.briandroid.SimulationActivity;
@@ -11,39 +14,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
 /**
- * Created by achilleas on 10/06/13.
- *
- * Implementation of simplifiedcoba.py found in the original brian repository,
- * which is in turn a standalone version of the COBA simulation.
- * Original description follows:
- *
- *
- * This is an implementation of a benchmark described
- * in the following review paper:
- *
- * Simulation of networks of spiking neurons: A review of tools and strategies (2006).
- * Brette, Rudolph, Carnevale, Hines, Beeman, Bower, Diesmann, Goodman, Harris, Zirpe,
- * Natschläger, Pecevski, Ermentrout, Djurfeldt, Lansner, Rochel, Vibert, Alvarez, Muller,
- * Davison, El Boustani and Destexhe.
- * Journal of Computational Neuroscience
- *
- * Benchmark 1: random network of integrate-and-fire neurons with exponential synaptic conductances
- *
- * Clock-driven implementation with Euler integration
- * (no spike time interpolation)
- *
- * R. Brette - Dec 2007
- *
- * =============================================================================
- *
+ * Version of the COBA simulation that uses RenderScript for state updaters
+ * Created by achilleas on 12/07/13.
  */
-public class COBA extends Simulation {
+public class COBArs extends Simulation {
     public SimulationActivity simActivity;
+    public final String ID = "COBArs";
 
-    public final String ID = "COBA";
-    private static String LOGID = "org.briansimulator.briandroid.COBA";
+    private RenderScript mRS;
+    private ScriptC_stupdate mScript;
+
+    Allocation vPointer;
+    Allocation gePointer;
+    Allocation giPointer;
+
+    Allocation vin;
+    Allocation vout;
 
     String simStateOutput;
     // parameters
@@ -66,18 +53,17 @@ public class COBA extends Simulation {
     float[][] S;
     float[][] dS;
 
-    public COBA(SimulationActivity sa) {
+    public COBArs(SimulationActivity sa) {
         simActivity = sa;
         setState(0);
     }
 
     public String toString() {
-        return "COBA";
+        return "COBArs";
     }
 
     @Override
     public void setup() {
-        // TODO: accept some sort of configuration object for dynamically setting up the parameters and simulation
         // parameters
         N = 4000;
         Ne = (int)(N*0.8);
@@ -97,38 +83,35 @@ public class COBA extends Simulation {
         // dS=[v';ge';gi;] used in the main loop below
         S = new float[3][N];
         dS = new float[3][N];
-
+        createScript();
     }
 
-    static int getBinomial(int n, float p) {
-        // very crude
-        // could also use apache commons library if it will make our lives easier
-        int x = 0;
-        for(int i = 0; i < n; i++) {
-            if(Math.random() < p)
-                x++;
-        }
-        return x;
-    }
+    private void createScript() {
+        mRS = RenderScript.create(simActivity.getApplicationContext());
 
-    static int[] shuffle(int[] anArray) {
-        // we could use Collections to automatically shuffle, but I'd rather
-        // stick with primitives if I can (at least for now)
-        int[] shuffled = anArray.clone();
-        int len = shuffled.length;
-        int r, tmp;
-        for (int max=len-1; max>0; max--) {
-            r = rng.nextInt(max);
-            tmp = shuffled[max];
-            shuffled[max] = shuffled[r];
-            shuffled[r] = tmp;
-        }
-        return shuffled;
+        mScript = new ScriptC_stupdate(mRS, simActivity.getResources(),
+                org.briansimulator.briandroid.R.raw.stupdate);
+        mScript.set_numNeurons(N);
+        mScript.set_dt(dt);
+
+        vPointer = Allocation.createSized(mRS, Element.F32(mRS),  N);
+        gePointer = Allocation.createSized(mRS, Element.F32(mRS),  N);
+        giPointer = Allocation.createSized(mRS, Element.F32(mRS),  N);
+
+        mScript.bind_v(vPointer);
+        mScript.bind_ge(gePointer);
+        mScript.bind_gi(giPointer);
+
+        vin = Allocation.createSized(mRS, Element.I32(mRS), 1);
+        vout = Allocation.createSized(mRS, Element.I32(mRS), 1);
     }
 
     static int[] randSample(int[] population, int k) {
-        int[] shuffled = shuffle(population);
-        return Arrays.copyOfRange(shuffled, 0, k);
+        //int[] shuffled = shuffle(population);
+        //return Arrays.copyOfRange(shuffled, 0, k);
+        int[] firstk = new int[k];
+        for (int i=0; i<k; i++) firstk[i] = population[i];
+        return firstk;
     }
 
     public boolean isExternalStorageWritable() {
@@ -139,7 +122,6 @@ public class COBA extends Simulation {
         return false;
     }
 
-
     List<int[]> connect() {
         // Weight matrix
         // Generate random connectivity matrix (note: no weights)
@@ -149,7 +131,8 @@ public class COBA extends Simulation {
             population[i]=i;
         }
         for (int i=0; i<N; i++) {
-            int k = getBinomial(N, p);
+            //int k = getBinomial(N, p);
+            int k = (int)(N*p);
             int[] a = randSample(population, k);
             Arrays.sort(a);
             W.add(a);
@@ -168,7 +151,6 @@ public class COBA extends Simulation {
         simStateOutput = "Setting up simulation ...\n";
         publishProgress(simStateOutput);
         float[] v = S[0]; float[] ge = S[1]; float[] gi = S[2];
-        float[] v__tmp = dS[0]; float[] ge__tmp = dS[1]; float[] gi__tmp = dS[2];
 
         // last spike times, stores the most recent time that a neuron has
         // spiked, which is used for refractory periods
@@ -202,21 +184,13 @@ public class COBA extends Simulation {
         publishProgress(simStateOutput);
         float progress;
         for (int h=0; h<numsteps; h++) { // using integer loop variable to avoid f.p. arithmetic issues
-            //progress = 100.0*h/numsteps;
-            //publishProgress(simStateOutput+progress+" %");
             t = h*dt;
-            // EULER UPDATE CODE, this is the update code generated by Brian for the equations:
-            // dv/dt = (-v+ge*(Ee-v)+gi*(Ei-v))*(1./taum) : volt
-            // dge/dt = -ge*(1./taue) : 1
-            // dgi/dt = -gi*(1./taui) : 1
+            vPointer.copyFrom(v);
+            gePointer.copyFrom(ge);
+            giPointer.copyFrom(gi);
             ArrayList<Integer> spikes_t = new ArrayList<Integer>(); // spikes for time t
+            mScript.forEach_root(vin, vout);
             for (int n=0; n<N; n++) {
-                v__tmp[n] = (-v[n]+ge[n]*(0.06f-v[n])+gi[n]*(-0.02f-v[n]))*(1.0f/0.02f);
-                ge__tmp[n] = -ge[n]*(1.0f/0.005f);
-                gi__tmp[n] = -gi[n]*(1.0f/0.01f);
-                S[0][n] += dt*dS[0][n];
-                S[1][n] += dt*dS[1][n];
-                S[2][n] += dt*dS[2][n];
                 // spike check
                 if (v[n] > Vt) {
                     spikes_t.add(n); // neuron n has spiked
@@ -285,5 +259,4 @@ public class COBA extends Simulation {
         setState(2);
         return;
     }
-
 }

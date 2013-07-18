@@ -79,6 +79,8 @@ public class SimulationActivity extends Activity {
             Toast.makeText(toastContext, "Loaded simulation "+theSim.toString(), Toast.LENGTH_LONG).show();
         }  else if (ID.equals("PitchOnline")) {
             theSim = new PitchOnline(this);
+<<<<<<< HEAD
+=======
             theSim.setup();
             theSim.setProgressView(statusText);
             Toast.makeText(toastContext, "Loaded simulation "+theSim.toString(), Toast.LENGTH_LONG).show();
@@ -89,6 +91,7 @@ public class SimulationActivity extends Activity {
             Toast.makeText(toastContext, "Loaded simulation "+theSim.toString(), Toast.LENGTH_LONG).show();
         } else if (ID.equals("Benchmark")) {
             theSim = new StUpdateBenchmark(this);
+>>>>>>> renderscript
             theSim.setup();
             theSim.setProgressView(statusText);
             Toast.makeText(toastContext, "Loaded simulation "+theSim.toString(), Toast.LENGTH_LONG).show();
