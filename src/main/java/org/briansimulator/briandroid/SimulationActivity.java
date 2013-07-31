@@ -13,7 +13,7 @@ import android.view.MenuItem;
  * in a {@link BDMainActivity}.
  * <p>
  * This activity is mostly just a 'shell' activity containing nothing
- * more than a {@link SimulationDetailFragment}.
+ * more than a {@link SimulationFragment}.
  */
 public class SimulationActivity extends FragmentActivity {
 
@@ -39,9 +39,9 @@ public class SimulationActivity extends FragmentActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(SimulationDetailFragment.ARG_ITEM_ID,
-                    getIntent().getStringExtra(SimulationDetailFragment.ARG_ITEM_ID));
-            SimulationDetailFragment fragment = new SimulationDetailFragment();
+            arguments.putString(SimulationFragment.ARG_ITEM_ID,
+                    getIntent().getStringExtra(SimulationFragment.ARG_ITEM_ID));
+            SimulationFragment fragment = new SimulationFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.item_detail_container, fragment)

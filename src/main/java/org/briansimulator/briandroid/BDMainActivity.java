@@ -23,7 +23,7 @@ import java.util.Map;
  * <p>
  * The activity makes heavy use of fragments. The list of items is a
  * {@link SimulationListFragment} and the item details
- * (if present) is a {@link SimulationDetailFragment}.
+ * (if present) is a {@link SimulationFragment}.
  * <p>
  * This activity also implements the required
  * {@link SimulationListFragment.Callbacks} interface
@@ -116,8 +116,8 @@ public class BDMainActivity extends FragmentActivity
             // adding or replacing the detail fragment using a
             // fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(SimulationDetailFragment.ARG_ITEM_ID, id);
-            SimulationDetailFragment fragment = new SimulationDetailFragment();
+            arguments.putString(SimulationFragment.ARG_ITEM_ID, id);
+            SimulationFragment fragment = new SimulationFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.item_detail_container, fragment)
@@ -127,7 +127,7 @@ public class BDMainActivity extends FragmentActivity
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
             Intent detailIntent = new Intent(this, SimulationActivity.class);
-            detailIntent.putExtra(SimulationDetailFragment.ARG_ITEM_ID, id);
+            detailIntent.putExtra(SimulationFragment.ARG_ITEM_ID, id);
             startActivity(detailIntent);
         }
     }

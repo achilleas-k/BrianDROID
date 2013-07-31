@@ -13,7 +13,7 @@ import android.widget.TextView;
  * in two-pane mode (on tablets) or a {@link SimulationActivity}
  * on handsets.
  */
-public class SimulationDetailFragment extends Fragment {
+public class SimulationFragment extends Fragment {
     /**
      * The fragment argument representing the item ID that this fragment
      * represents.
@@ -29,7 +29,7 @@ public class SimulationDetailFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public SimulationDetailFragment() {
+    public SimulationFragment() {
     }
 
     @Override
