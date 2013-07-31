@@ -2,11 +2,15 @@ package org.briansimulator.briandroid;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.FragmentActivity;
 import android.widget.TextView;
 
 import org.briansimulator.briandroid.Simulations.COBA;
 
+import java.io.File;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +43,7 @@ public class BDMainActivity extends FragmentActivity
     private boolean mTwoPane;
 
 
-    public static List<SimItem> SIMS = new ArrayList<SimItem>();
+    public static List<String> SIMS = new ArrayList<String>();
     public static Map<String, SimItem> SIMS_MAP = new HashMap<String, SimItem>();
 
 
@@ -70,13 +74,23 @@ public class BDMainActivity extends FragmentActivity
         }
     }
 
-    private static void addItem(SimItem item) {
-        SIMS.add(item);
-        SIMS_MAP.put(item.id, item);
-    }
-
     private static void buildClassList(String directory) {
-        // TODO: Build class list based on directory contents
+        // TODO: Filesystem checks (directory exists)
+        SIMS.clear();
+        File classDir = new File(directory);
+        try {
+            URL[] fileURL = new URL[] {classDir.toURI().toURL()};
+            ClassLoader loader = new URLClassLoader(fileURL);
+            File[] dirListing = classDir.listFiles();
+            for (File file : dirListing) {
+                String filename = file.getName();
+                if (filename.endsWith(".class")) { // TODO: Use a smarter check for class
+                    SIMS.add(filename.replace(".class", "")); // TODO: too naive
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -98,11 +112,15 @@ public class BDMainActivity extends FragmentActivity
                     .setActivateOnItemClick(true);
         }
 
-        String classDirectory = "";
-        buildClassList(classDirectory);
-        SIMS.clear();
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            File storageRoot = Environment.getExternalStorageDirectory();
+            String classDirectory = storageRoot.getAbsolutePath()+"/BrianDROIDsims/";
+            buildClassList(classDirectory);
+        } else {
+            // TODO: popup error - storage not present or readable
+        }
 
-        addItem(new SimItem("COBA", "COBA simulation"));
     }
 
     /**
