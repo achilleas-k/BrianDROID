@@ -20,7 +20,8 @@ import java.util.Iterator;
  * perception model in real time.
  *
  *
- * Created by achilleas on 08/07/13.
+ * Created by Achilleas Koutsou on 08/07/13.
+ *
  */
 public class PitchOnline extends Simulation {
     public SimulationActivity simActivity;

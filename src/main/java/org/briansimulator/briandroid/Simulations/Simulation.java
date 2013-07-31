@@ -10,7 +10,7 @@ import java.util.Random;
  * override the run() and setup() methods.
  *
  *
- * Created by achilleas on 14/06/13.
+ * Created by Achilleas Koutsou on 14/06/13.
  *
  */
 public abstract class Simulation extends AsyncTask<Void, String, Void> {

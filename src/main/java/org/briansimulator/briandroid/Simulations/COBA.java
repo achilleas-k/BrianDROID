@@ -12,7 +12,7 @@ import java.util.List;
 
 
 /**
- * Created by achilleas on 10/06/13.
+ * Created by Achilleas Koutsou on 10/06/13.
  *
  * Implementation of simplifiedcoba.py found in the original brian repository,
  * which is in turn a standalone version of the COBA simulation.

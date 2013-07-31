@@ -20,7 +20,7 @@ import java.util.Iterator;
  * Originally a direct port of the version found in Brian's examples, it
  * currently reads raw audio files instead. File must be 8-bit unsigned PCM.
  *
- * Created by achilleas on 19/06/13.
+ * Created by Achilleas Koutsou on 19/06/13.
  */
 public class PitchOffline extends Simulation {
     public SimulationActivity simActivity;
