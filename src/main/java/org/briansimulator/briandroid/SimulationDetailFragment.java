@@ -10,7 +10,7 @@ import android.widget.TextView;
 /**
  * A fragment representing a single Item detail screen.
  * This fragment is either contained in a {@link BDMainActivity}
- * in two-pane mode (on tablets) or a {@link SimulationDetailActivity}
+ * in two-pane mode (on tablets) or a {@link SimulationActivity}
  * on handsets.
  */
 public class SimulationDetailFragment extends Fragment {

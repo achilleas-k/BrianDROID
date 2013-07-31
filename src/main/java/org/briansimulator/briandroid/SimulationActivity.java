@@ -15,7 +15,7 @@ import android.view.MenuItem;
  * This activity is mostly just a 'shell' activity containing nothing
  * more than a {@link SimulationDetailFragment}.
  */
-public class SimulationDetailActivity extends FragmentActivity {
+public class SimulationActivity extends FragmentActivity {
 
 
     @Override

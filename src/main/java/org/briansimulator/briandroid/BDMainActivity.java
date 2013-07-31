@@ -17,7 +17,7 @@ import java.util.Map;
  * An activity representing a list of Items. This activity
  * has different presentations for handset and tablet-size devices. On
  * handsets, the activity presents a list of items, which when touched,
- * lead to a {@link SimulationDetailActivity} representing
+ * lead to a {@link SimulationActivity} representing
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  * <p>
@@ -75,6 +75,10 @@ public class BDMainActivity extends FragmentActivity
         SIMS_MAP.put(item.id, item);
     }
 
+    private static void buildClassList(String directory) {
+        // TODO: Build class list based on directory contents
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,9 +98,11 @@ public class BDMainActivity extends FragmentActivity
                     .setActivateOnItemClick(true);
         }
 
-        // TODO: If exposing deep links into your app, handle intents here.
+        String classDirectory = "";
+        buildClassList(classDirectory);
+        SIMS.clear();
+
         addItem(new SimItem("COBA", "COBA simulation"));
-        addItem(new SimItem("CUBA", "CUBA simulation"));
     }
 
     /**
@@ -120,7 +126,7 @@ public class BDMainActivity extends FragmentActivity
         } else {
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
-            Intent detailIntent = new Intent(this, SimulationDetailActivity.class);
+            Intent detailIntent = new Intent(this, SimulationActivity.class);
             detailIntent.putExtra(SimulationDetailFragment.ARG_ITEM_ID, id);
             startActivity(detailIntent);
         }

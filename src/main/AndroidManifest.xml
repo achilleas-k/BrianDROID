@@ -23,7 +23,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SimulationDetailActivity"
+            android:name=".SimulationActivity"
             android:label="@string/title_item_detail"
             android:parentActivityName=".ItemListActivity" >
             <meta-data
