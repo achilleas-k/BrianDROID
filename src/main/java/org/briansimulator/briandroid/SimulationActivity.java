@@ -14,6 +14,10 @@ import android.view.MenuItem;
  * <p>
  * This activity is mostly just a 'shell' activity containing nothing
  * more than a {@link SimulationFragment}.
+ *
+ * NOTE: There is probably no need to ever edit this activity (afaict).
+ *                  DO NOT EDIT!
+ *
  */
 public class SimulationActivity extends FragmentActivity {
 
