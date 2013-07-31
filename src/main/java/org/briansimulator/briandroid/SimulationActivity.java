@@ -43,8 +43,8 @@ public class SimulationActivity extends FragmentActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(SimulationFragment.ARG_ITEM_ID,
-                    getIntent().getStringExtra(SimulationFragment.ARG_ITEM_ID));
+            arguments.putString(SimulationFragment.ARG_SIM_ID,
+                    getIntent().getStringExtra(SimulationFragment.ARG_SIM_ID));
             SimulationFragment fragment = new SimulationFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()

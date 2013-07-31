@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     tools:context=".ItemDetailActivity"
     tools:ignore="MergeRootFrame" >
-
+<!--
     <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -17,9 +17,10 @@
             android:layout_width="fill_parent"
             android:layout_height="323dp"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="Small Text"
+            android:text=""
             android:id="@+id/statusText"
             android:layout_gravity="center"
             android:layout_marginTop="-2dp"
             android:editable="false"/>
+            -->
 </FrameLayout>

@@ -44,38 +44,9 @@ public class BDMainActivity extends FragmentActivity
 
 
     public static List<String> SIMS = new ArrayList<String>();
-    public static Map<String, SimItem> SIMS_MAP = new HashMap<String, SimItem>();
-
-
-    public static class SimItem {
-        public String id;
-        public String description;
-        COBA simulation;
-
-        public SimItem(String id, String description) {
-            this.id = id;
-            this.description = description;
-            this.simulation = new COBA();
-            this.simulation.setup();
-        }
-
-        @Override
-        public String toString() {
-            return this.description;
-        }
-
-        public void run(TextView tv) {
-            this.simulation.setProgressView(tv);
-            if (this.simulation.getState() == 0) {
-                this.simulation.execute();
-            } else if (this.simulation.getState() == 2) {
-
-            }
-        }
-    }
 
     private static void buildClassList(String directory) {
-        // TODO: Filesystem checks (directory exists)
+        // TODO: Filesystem checks (directory exists, is readable, etc)
         SIMS.clear();
         File classDir = new File(directory);
         try {
@@ -134,7 +105,7 @@ public class BDMainActivity extends FragmentActivity
             // adding or replacing the detail fragment using a
             // fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(SimulationFragment.ARG_ITEM_ID, id);
+            arguments.putString(SimulationFragment.ARG_SIM_ID, id);
             SimulationFragment fragment = new SimulationFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
@@ -145,7 +116,7 @@ public class BDMainActivity extends FragmentActivity
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
             Intent detailIntent = new Intent(this, SimulationActivity.class);
-            detailIntent.putExtra(SimulationFragment.ARG_ITEM_ID, id);
+            detailIntent.putExtra(SimulationFragment.ARG_SIM_ID, id);
             startActivity(detailIntent);
         }
     }
