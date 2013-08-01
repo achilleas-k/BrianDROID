@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.widget.TextView;
 
 import org.briansimulator.briandroid.Simulations.COBA;
@@ -75,12 +76,15 @@ public class BDMainActivity extends FragmentActivity
             // res/values-sw600dp). If this view is present, then the
             // activity should be in two-pane mode.
             mTwoPane = true;
+            Log.d("==============================", "TWO PANE IS TRUE!!!!\n\n\n\n\n");
 
             // In two-pane mode, list items should be given the
             // 'activated' state when touched.
             ((SimulationListFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.item_list))
                     .setActivateOnItemClick(true);
+        } else {
+            Log.d("==============================", "\n\n\n\n\nTWO PANE IS FALSE!!!!\n\n\n\n\n");
         }
 
         String state = Environment.getExternalStorageState();

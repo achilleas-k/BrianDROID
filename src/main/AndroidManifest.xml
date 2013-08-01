@@ -14,7 +14,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".BDMainActivity"
+            android:name="org.briansimulator.briandroid.BDMainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,7 +23,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SimulationActivity"
+            android:name="org.briansimulator.briandroid.SimulationActivity"
             android:label="@string/title_item_detail"
             android:parentActivityName=".ItemListActivity" >
             <meta-data
