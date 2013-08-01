@@ -21,6 +21,10 @@ public class SimulationFragment extends Fragment {
      * represents.
      */
     public static final String ARG_SIM_ID = "sim_id";
+
+    /**
+     * The Simulations name this fragment is presenting.
+     */
     private String simulationName;
 
     /**
@@ -45,9 +49,10 @@ public class SimulationFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_simulation_detail, container, false);
-        View simView = inflater.inflate(R.layout.activity_simulation, container, false);
+        //View simView = inflater.inflate(R.layout.activity_simulation, container, false);
         //TextView statusView = (TextView) simView.findViewById(R.id.statusText);
         if (simulationName != null) {
+            TextView statusView = (TextView) rootView.findViewById(R.id.item_detail);
         //    statusView.setText(simulationName);
         } else {
          //   statusView.setText("ERROR while loading simulation.");
