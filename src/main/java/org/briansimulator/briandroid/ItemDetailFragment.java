@@ -25,7 +25,7 @@ public class ItemDetailFragment extends Fragment {
     /**
      * The Simulations name this fragment is presenting.
      */
-    private String simulationName;
+    private ItemListActivity.SimItem sItem;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -37,22 +37,25 @@ public class ItemDetailFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        simulationName = (String)getArguments().get(ARG_SIM_ID);
-        int duration = Toast.LENGTH_LONG;
-        Activity context = getActivity();
-        Toast toast = Toast.makeText(context, simulationName, duration);
-        toast.show();
+        if (getArguments().containsKey(ARG_SIM_ID)) {
+            sItem = ItemListActivity.SIM_MAP.get(getArguments().getString(ARG_SIM_ID));
+           // int duration = Toast.LENGTH_LONG;
+           // Activity context = getActivity();
+           // Toast toast = Toast.makeText(context, sItem.content, duration);
+           // toast.show();
 
+        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_simulation_detail, container, false);
-        //View simView = inflater.inflate(R.layout.activity_simulation, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_item_detail, container, false);
+        //View simView = inflater.inflate(R.layout.activity_item_detail, container, false);
         //TextView statusView = (TextView) simView.findViewById(R.id.statusText);
-        if (simulationName != null) {
-            TextView statusView = (TextView) rootView.findViewById(R.id.item_detail);
+        if (sItem != null) {
+            //TextView statusView = (TextView) rootView.findViewById(R.id.item_detail);
+            ((TextView) rootView.findViewById(R.id.item_detail)).setText(sItem.content);
         //    statusView.setText(simulationName);
         } else {
          //   statusView.setText("ERROR while loading simulation.");

@@ -10,7 +10,9 @@ import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -39,7 +41,23 @@ public class ItemListActivity extends FragmentActivity
     private boolean mTwoPane;
 
 
-    public static List<String> SIMS = new ArrayList<String>();
+    public static List<SimItem> SIMS = new ArrayList<SimItem>();
+    public static Map<String, SimItem> SIM_MAP = new HashMap<String, SimItem>();
+
+    public static class SimItem {
+        public String id;
+        public String content;
+
+        public SimItem(String id, String content) {
+            this.id = id;
+            this.content = content;
+        }
+
+        @Override
+        public String toString() {
+            return content;
+        }
+    }
 
     private static void buildClassList(String directory) {
         // TODO: Filesystem checks (directory exists, is readable, etc)
@@ -49,10 +67,12 @@ public class ItemListActivity extends FragmentActivity
             URL[] fileURL = new URL[] {classDir.toURI().toURL()};
             ClassLoader loader = new URLClassLoader(fileURL);
             File[] dirListing = classDir.listFiles();
+            int fidx = 0;
             for (File file : dirListing) {
                 String filename = file.getName();
                 if (filename.endsWith(".class")) { // TODO: Use a smarter check for class
-                    SIMS.add(filename.replace(".class", "")); // TODO: too naive
+                    SIMS.add(new SimItem(""+fidx, filename.replace(".class", "")));
+                    fidx++;
                 }
             }
         } catch (Exception e) {
@@ -63,7 +83,7 @@ public class ItemListActivity extends FragmentActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_simulation_list);
+        setContentView(R.layout.activity_item_list);
 
         if (findViewById(R.id.item_detail_container) != null) {
             // The detail container view will be present only in the

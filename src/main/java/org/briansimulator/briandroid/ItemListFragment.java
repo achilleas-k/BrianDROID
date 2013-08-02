@@ -68,8 +68,7 @@ public class ItemListFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // TODO: replace with a real list adapter.
-        setListAdapter(new ArrayAdapter<String>(
+        setListAdapter(new ArrayAdapter<ItemListActivity.SimItem>(
                 getActivity(),
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
@@ -113,7 +112,7 @@ public class ItemListFragment extends ListFragment {
 
         // Notify the active callbacks interface (the activity, if the
         // fragment is attached to one) that an item has been selected.
-        mCallbacks.onItemSelected(ItemListActivity.SIMS.get(position));
+        mCallbacks.onItemSelected(ItemListActivity.SIMS.get(position).id);
     }
 
     @Override
