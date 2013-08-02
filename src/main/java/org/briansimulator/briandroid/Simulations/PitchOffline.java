@@ -3,7 +3,7 @@ package org.briansimulator.briandroid.Simulations;
 import android.os.Environment;
 import android.util.Log;
 
-import org.briansimulator.briandroid.SimulationActivity;
+import org.briansimulator.briandroid.ItemDetailActivity;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -23,7 +23,7 @@ import java.util.Iterator;
  * Created by Achilleas Koutsou on 19/06/13.
  */
 public class PitchOffline extends Simulation {
-    public SimulationActivity simActivity;
+    public ItemDetailActivity simActivity;
     public String ID = "PitchOffline";
 
     private static String LOGID = "org.briansimulator.briandroid.OFFLINEPITCH";
@@ -62,7 +62,7 @@ public class PitchOffline extends Simulation {
     BufferedInputStream soundStream;
     float[] sound;
 
-    public PitchOffline(SimulationActivity sa) {
+    public PitchOffline(ItemDetailActivity sa) {
         simActivity = sa;
         setState(0);
     }

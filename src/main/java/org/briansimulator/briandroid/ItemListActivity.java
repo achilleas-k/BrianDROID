@@ -5,37 +5,32 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.widget.TextView;
-
-import org.briansimulator.briandroid.Simulations.COBA;
 
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /**
  * An activity representing a list of Items. This activity
  * has different presentations for handset and tablet-size devices. On
  * handsets, the activity presents a list of items, which when touched,
- * lead to a {@link SimulationActivity} representing
+ * lead to a {@link ItemDetailActivity} representing
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  * <p>
  * The activity makes heavy use of fragments. The list of items is a
- * {@link SimulationListFragment} and the item details
- * (if present) is a {@link SimulationFragment}.
+ * {@link ItemListFragment} and the item details
+ * (if present) is a {@link ItemDetailFragment}.
  * <p>
  * This activity also implements the required
- * {@link SimulationListFragment.Callbacks} interface
+ * {@link ItemListFragment.Callbacks} interface
  * to listen for item selections.
  */
-public class BDMainActivity extends FragmentActivity
-        implements SimulationListFragment.Callbacks {
+public class ItemListActivity extends FragmentActivity
+        implements ItemListFragment.Callbacks {
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -80,7 +75,7 @@ public class BDMainActivity extends FragmentActivity
 
             // In two-pane mode, list items should be given the
             // 'activated' state when touched.
-            ((SimulationListFragment) getSupportFragmentManager()
+            ((ItemListFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.item_list))
                     .setActivateOnItemClick(true);
         } else {
@@ -99,7 +94,7 @@ public class BDMainActivity extends FragmentActivity
     }
 
     /**
-     * Callback method from {@link SimulationListFragment.Callbacks}
+     * Callback method from {@link ItemListFragment.Callbacks}
      * indicating that the item with the given ID was selected.
      */
     @Override
@@ -109,8 +104,8 @@ public class BDMainActivity extends FragmentActivity
             // adding or replacing the detail fragment using a
             // fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(SimulationFragment.ARG_SIM_ID, id);
-            SimulationFragment fragment = new SimulationFragment();
+            arguments.putString(ItemDetailFragment.ARG_SIM_ID, id);
+            ItemDetailFragment fragment = new ItemDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.item_detail_container, fragment)
@@ -119,8 +114,8 @@ public class BDMainActivity extends FragmentActivity
         } else {
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
-            Intent detailIntent = new Intent(this, SimulationActivity.class);
-            detailIntent.putExtra(SimulationFragment.ARG_SIM_ID, id);
+            Intent detailIntent = new Intent(this, ItemDetailActivity.class);
+            detailIntent.putExtra(ItemDetailFragment.ARG_SIM_ID, id);
             startActivity(detailIntent);
         }
     }

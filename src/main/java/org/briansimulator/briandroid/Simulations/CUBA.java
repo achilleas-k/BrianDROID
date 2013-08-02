@@ -3,7 +3,7 @@ package org.briansimulator.briandroid.Simulations;
 import android.os.Environment;
 import android.util.Log;
 
-import org.briansimulator.briandroid.SimulationActivity;
+import org.briansimulator.briandroid.ItemDetailActivity;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,7 +15,7 @@ import java.util.List;
  * Created by Achilleas Koutsou on 19/06/13.
  */
 public class CUBA extends Simulation {
-    public SimulationActivity simActivity;
+    public ItemDetailActivity simActivity;
     public final String ID = "CUBA";
 
     int N;
@@ -34,7 +34,7 @@ public class CUBA extends Simulation {
     float[] _C;
     float[][] S;
 
-    public CUBA(SimulationActivity sa) {
+    public CUBA(ItemDetailActivity sa) {
         simActivity = sa;
         setState(0);
     }

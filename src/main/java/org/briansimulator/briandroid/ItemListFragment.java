@@ -11,12 +11,12 @@ import android.widget.ListView;
  * A list fragment representing a list of Items. This fragment
  * also supports tablet devices by allowing list items to be given an
  * 'activated' state upon selection. This helps indicate which item is
- * currently being viewed in a {@link SimulationFragment}.
+ * currently being viewed in a {@link ItemDetailFragment}.
  * <p>
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class SimulationListFragment extends ListFragment {
+public class ItemListFragment extends ListFragment {
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -61,7 +61,7 @@ public class SimulationListFragment extends ListFragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public SimulationListFragment() {
+    public ItemListFragment() {
     }
 
     @Override
@@ -73,7 +73,7 @@ public class SimulationListFragment extends ListFragment {
                 getActivity(),
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
-                BDMainActivity.SIMS));
+                ItemListActivity.SIMS));
     }
 
     @Override
@@ -113,7 +113,7 @@ public class SimulationListFragment extends ListFragment {
 
         // Notify the active callbacks interface (the activity, if the
         // fragment is attached to one) that an item has been selected.
-        mCallbacks.onItemSelected(BDMainActivity.SIMS.get(position));
+        mCallbacks.onItemSelected(ItemListActivity.SIMS.get(position));
     }
 
     @Override

@@ -10,16 +10,14 @@ import android.view.MenuItem;
  * An activity representing a single Item detail screen. This
  * activity is only used on handset devices. On tablet-size devices,
  * item details are presented side-by-side with a list of items
- * in a {@link BDMainActivity}.
+ * in a {@link ItemListActivity}.
  * <p>
  * This activity is mostly just a 'shell' activity containing nothing
- * more than a {@link SimulationFragment}.
+ * more than a {@link ItemDetailFragment}.
  *
- * NOTE: There is probably no need to ever edit this activity (afaict).
- *                  DO NOT EDIT!
  *
  */
-public class SimulationActivity extends FragmentActivity {
+public class ItemDetailActivity extends FragmentActivity {
 
 
     @Override
@@ -43,9 +41,9 @@ public class SimulationActivity extends FragmentActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(SimulationFragment.ARG_SIM_ID,
-                    getIntent().getStringExtra(SimulationFragment.ARG_SIM_ID));
-            SimulationFragment fragment = new SimulationFragment();
+            arguments.putString(ItemDetailFragment.ARG_SIM_ID,
+                    getIntent().getStringExtra(ItemDetailFragment.ARG_SIM_ID));
+            ItemDetailFragment fragment = new ItemDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.item_detail_container, fragment)
@@ -64,7 +62,7 @@ public class SimulationActivity extends FragmentActivity {
                 //
                 // http://developer.android.com/design/patterns/navigation.html#up-vs-back
                 //
-                NavUtils.navigateUpTo(this, new Intent(this, BDMainActivity.class));
+                NavUtils.navigateUpTo(this, new Intent(this, ItemListActivity.class));
                 return true;
         }
         return super.onOptionsItemSelected(item);
