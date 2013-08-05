@@ -55,8 +55,13 @@ public class ItemListActivity extends FragmentActivity
 
         @Override
         public String toString() {
-            return content;
+            return id;
         }
+    }
+
+    static void addClass(SimItem item){
+        SIMS.add(item);
+        SIM_MAP.put(item.id, item);
     }
 
     private static void buildClassList(String directory) {
@@ -71,7 +76,7 @@ public class ItemListActivity extends FragmentActivity
             for (File file : dirListing) {
                 String filename = file.getName();
                 if (filename.endsWith(".class")) { // TODO: Use a smarter check for class
-                    SIMS.add(new SimItem(""+fidx, filename.replace(".class", "")));
+                    addClass(new SimItem(filename.replace(".class", ""), "The class name for this simulation is "+filename));
                     fidx++;
                 }
             }
@@ -91,7 +96,7 @@ public class ItemListActivity extends FragmentActivity
             // res/values-sw600dp). If this view is present, then the
             // activity should be in two-pane mode.
             mTwoPane = true;
-            Log.d("==============================", "TWO PANE IS TRUE!!!!\n\n\n\n\n");
+            Log.d("==============================", "TWO PANE IS TRUE!!!!");
 
             // In two-pane mode, list items should be given the
             // 'activated' state when touched.
@@ -99,7 +104,7 @@ public class ItemListActivity extends FragmentActivity
                     .findFragmentById(R.id.item_list))
                     .setActivateOnItemClick(true);
         } else {
-            Log.d("==============================", "\n\n\n\n\nTWO PANE IS FALSE!!!!\n\n\n\n\n");
+            Log.d("==============================", "TWO PANE IS FALSE!!!!");
         }
 
         String state = Environment.getExternalStorageState();

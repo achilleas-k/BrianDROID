@@ -51,12 +51,8 @@ public class ItemDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_item_detail, container, false);
-        //View simView = inflater.inflate(R.layout.activity_item_detail, container, false);
-        //TextView statusView = (TextView) simView.findViewById(R.id.statusText);
         if (sItem != null) {
-            //TextView statusView = (TextView) rootView.findViewById(R.id.item_detail);
-            ((TextView) rootView.findViewById(R.id.item_detail)).setText(sItem.content);
-        //    statusView.setText(simulationName);
+            ((TextView) rootView.findViewById(R.id.statusText)).setText(sItem.content);
         } else {
          //   statusView.setText("ERROR while loading simulation.");
         }
