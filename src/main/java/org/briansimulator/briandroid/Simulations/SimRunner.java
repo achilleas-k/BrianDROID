@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,16 +30,10 @@ import dalvik.system.DexClassLoader;
 public class SimRunner extends AsyncTask<Void, String, Void> {
     final static String LOGID = "org.briansimulator.briandroid.Simulations.SimRunner";
     protected TextView progressText;
-    Class simClass;
+    Class simulationClass;
+    Object simulation;
     String simulationDescription;
     Context appContext;
-
-
-    public SimRunner(Class cl) {
-        // not sure if this is necessary - might be simpler to just use this class
-        // to load classes
-        simClass = cl;
-    }
 
     // File I/O code to copy the secondary dex file from asset resource to internal storage.
     private boolean prepareDex(String dexLocation, File dexInternalStoragePath) {
@@ -108,11 +103,25 @@ public class SimRunner extends AsyncTask<Void, String, Void> {
                 optimisedDexOutputPath.getAbsolutePath(),
                 null,
                 appContext.getClassLoader());
-        Class libProviderClass = null;
+        Class loadedClass = null;
 
+        Object classInstance = null;
         try {
             // Load the library class from the class loader.
-            libProviderClass = cl.loadClass(dexName);
+            loadedClass = cl.loadClass(dexName.replace(".dex", ""));
+            Method[] classMethods = loadedClass.getDeclaredMethods();
+            Log.d(LOGID, "Methods:");
+            for (Method meth : classMethods) {
+                Log.d(LOGID, meth.getName());
+            }
+            Field[] classFields = loadedClass.getDeclaredFields();
+            Log.d(LOGID, "Fields:");
+            for (Field f : classFields) {
+                Log.d(LOGID, f.getName());
+            }
+            classInstance = loadedClass.newInstance();
+            simulationDescription = (String)loadedClass.getDeclaredMethod("getDescription").invoke(classInstance, null);
+
 
             // Cast the return object to the library interface so that the
             // caller can directly invoke methods in the interface.
@@ -127,36 +136,31 @@ public class SimRunner extends AsyncTask<Void, String, Void> {
             // TODO: Handle exceptions
             e.printStackTrace();
         }
-
-
+        simulationClass = loadedClass;
+        simulation = classInstance;
     }
-
-    public void setSimClass(Class cl) {
-        simClass = cl;
-    }
-
 
     protected Void doInBackground(Void... _) {
         Method simSetup, simRun;
         try {
-            simSetup = simClass.getDeclaredMethod("setup", (Class)null);
+            simSetup = simulationClass.getDeclaredMethod("setup", (Class)null);
         } catch (NoSuchMethodException nsme) {
-            Log.d(LOGID, "Class "+simClass.getName()+" does not declare setup() method.");
+            Log.d(LOGID, "Class "+simulationClass.getName()+" does not declare setup() method.");
             nsme.printStackTrace();
             return null;
         }
         try {
-            simRun = simClass.getDeclaredMethod("run", (Class)null);
+            simRun = simulationClass.getDeclaredMethod("run", (Class)null);
         } catch (NoSuchMethodException nsme) {
-            Log.d(LOGID, "Class "+simClass.getName()+" does not declare run() method.");
+            Log.d(LOGID, "Class "+simulationClass.getName()+" does not declare run() method.");
             nsme.printStackTrace();
             return null;
         }
         try {
-            simSetup.invoke(simClass, (Object)null);
-            simRun.invoke(simClass, (Object)null);
+            simSetup.invoke(simulationClass, (Object)null);
+            simRun.invoke(simulationClass, (Object)null);
         } catch (Exception e) {  // TODO: Catch exceptions properly
-            Log.d(LOGID, "Error running simulation "+simClass.getName()+". Exception trace follows.");
+            Log.d(LOGID, "Error running simulation "+simulationClass.getName()+". Exception trace follows.");
             e.printStackTrace();
         }
         return null;
