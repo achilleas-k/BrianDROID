@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.briansimulator.briandroid.Simulations.SimRunner;
+
 /**
  * A fragment representing a single Item detail screen.
  * This fragment is either contained in a {@link ItemListActivity}
@@ -52,7 +54,8 @@ public class ItemDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_item_detail, container, false);
         if (sItem != null) {
-            ((TextView) rootView.findViewById(R.id.statusText)).setText(sItem.content);
+            SimRunner selectedSim = new SimRunner(getActivity(), sItem.abspath);
+            ((TextView) rootView.findViewById(R.id.statusText)).setText(selectedSim.getDescription());
         } else {
          //   statusView.setText("ERROR while loading simulation.");
         }

@@ -47,10 +47,12 @@ public class ItemListActivity extends FragmentActivity
     public static class SimItem {
         public String id;
         public String content;
+        public String abspath;
 
-        public SimItem(String id, String content) {
+        public SimItem(String id, String content, String abspath) {
             this.id = id;
             this.content = content;
+            this.abspath = abspath;
         }
 
         @Override
@@ -75,8 +77,11 @@ public class ItemListActivity extends FragmentActivity
             int fidx = 0;
             for (File file : dirListing) {
                 String filename = file.getName();
-                if (filename.endsWith(".class")) { // TODO: Use a smarter check for class
-                    addClass(new SimItem(filename.replace(".class", ""), "The class name for this simulation is "+filename));
+                if (filename.endsWith(".dex")) { // TODO: Use a smarter check for class
+                    addClass(new SimItem(filename.replace(".dex", ""),
+                            "The class name for this simulation is "+filename,
+                            file.getAbsolutePath()
+                            ));
                     fidx++;
                 }
             }
@@ -96,15 +101,12 @@ public class ItemListActivity extends FragmentActivity
             // res/values-sw600dp). If this view is present, then the
             // activity should be in two-pane mode.
             mTwoPane = true;
-            Log.d("==============================", "TWO PANE IS TRUE!!!!");
 
             // In two-pane mode, list items should be given the
             // 'activated' state when touched.
             ((ItemListFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.item_list))
                     .setActivateOnItemClick(true);
-        } else {
-            Log.d("==============================", "TWO PANE IS FALSE!!!!");
         }
 
         String state = Environment.getExternalStorageState();

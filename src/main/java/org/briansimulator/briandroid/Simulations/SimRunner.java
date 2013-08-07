@@ -1,15 +1,23 @@
 package org.briansimulator.briandroid.Simulations;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.TextView;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+
+import dalvik.system.DexClassLoader;
 
 /**
  * Created by Achilleas Koutsou on 31/07/13.
@@ -22,39 +30,105 @@ public class SimRunner extends AsyncTask<Void, String, Void> {
     final static String LOGID = "org.briansimulator.briandroid.Simulations.SimRunner";
     protected TextView progressText;
     Class simClass;
+    String simulationDescription;
+    Context appContext;
 
 
-    public void SimRunner(Class cl) {
+    public SimRunner(Class cl) {
         // not sure if this is necessary - might be simpler to just use this class
         // to load classes
-        setSimClass(cl);
+        simClass = cl;
     }
 
-    public void SimRunner(String class_location_str) {
-        // TODO: check file type here???
-        File class_location;
-        File class_directory = null;
-        Class simclass;
-        String class_filename = "";
+    // File I/O code to copy the secondary dex file from asset resource to internal storage.
+    private boolean prepareDex(String dexLocation, File dexInternalStoragePath) {
+        FileInputStream fis = null;
+        OutputStream dexWriter = null;
+        int bufSize = 128*1024;
         try {
-            class_location = (new File(class_location_str)).getCanonicalFile();
-            class_directory = class_location.getAbsoluteFile().getParentFile();
-            class_filename = class_location.getName().replace(".class", "");
-            URL class_directory_url = class_directory.toURI().toURL();
-            ClassLoader loader = new URLClassLoader(new URL[] {class_directory_url});
-            simclass = loader.loadClass(class_filename);
-            setSimClass(simclass);
-        } catch (MalformedURLException mue) {
-            Log.d(LOGID, "Malformed URL while converting "+class_directory.toString());
-            Log.d(LOGID, "Trace follows:");
-            mue.printStackTrace();
-        } catch (IOException ioe) {
-            Log.d(LOGID, "OIException reading file "+class_location_str);
-            Log.d(LOGID, "Trace follows:");
-            ioe.printStackTrace();
-        } catch (ClassNotFoundException cnfe) {
-            Log.d(LOGID, "ClassNotFoundException loading file "+class_filename);
+            fis = new FileInputStream(new File(dexLocation));
+            dexWriter = new BufferedOutputStream(new FileOutputStream(dexInternalStoragePath));
+            byte[] buf = new byte[bufSize];
+            int len;
+            while((len = fis.read(buf, 0, bufSize)) > 0) {
+                dexWriter.write(buf, 0, len);
+            }
+            dexWriter.close();
+            fis.close();
+            return true;
+        } catch (IOException e) {
+            if (dexWriter != null) {
+                try {
+                    dexWriter.close();
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                }
+            }
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
+    }
+
+
+    public SimRunner(Context context, String classLocationStr) {
+        // TODO: check file type here: perhaps unnecessary since the class loading will fail if it's not a proper class
+        Log.d(LOGID, "Copying dex file to internal storage.");
+        // From http://android-developers.blogspot.com/2011/07/custom-class-loading-in-dalvik.html
+        // Before the secondary dex file can be processed by the DexClassLoader,
+        // it has to be first copied from asset resource to a storage location.
+        File originalDex = new File(classLocationStr);
+        String dexName = originalDex.getName();
+        this.appContext = context;
+        final File dexInternalStoragePath = new File(appContext.getDir("dex", Context.MODE_PRIVATE),
+                                                        dexName);
+        if (!dexInternalStoragePath.exists()) {
+            // TODO: start loading spinner
+
+            if (!prepareDex(classLocationStr, dexInternalStoragePath)) {
+                Log.e(LOGID, "Caching of dex file failed!");
+                // TODO: Error popup -- throw exception???
+            }
+        }
+        Log.d(LOGID, "Loading class " + dexInternalStoragePath.toString());
+        // Internal storage where the DexClassLoader writes the optimized dex file to.
+        final File optimisedDexOutputPath = appContext.getDir("outdex", Context.MODE_PRIVATE);
+
+        // Initialize the class loader with the secondary dex file.
+        DexClassLoader cl = new DexClassLoader(dexInternalStoragePath.getAbsolutePath(),
+                optimisedDexOutputPath.getAbsolutePath(),
+                null,
+                appContext.getClassLoader());
+        Class libProviderClass = null;
+
+        try {
+            // Load the library class from the class loader.
+            libProviderClass = cl.loadClass(dexName);
+
+            // Cast the return object to the library interface so that the
+            // caller can directly invoke methods in the interface.
+            // Alternatively, the caller can invoke methods through reflection,
+            // which is more verbose and slow.
+            //
+            // TODO: Adapt the existing Simulation.class for this purpose
+            //
+            // LibraryInterface lib = (LibraryInterface) libProviderClass.newInstance();
+
+        } catch (Exception e) {
+            // TODO: Handle exceptions
+            e.printStackTrace();
+        }
+
+
     }
 
     public void setSimClass(Class cl) {
@@ -86,6 +160,10 @@ public class SimRunner extends AsyncTask<Void, String, Void> {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public String getDescription() {
+        return simulationDescription;
     }
 
     public void setProgressView(TextView tv) {
