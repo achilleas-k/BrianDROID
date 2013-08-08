@@ -30,6 +30,11 @@ public class ItemDetailFragment extends Fragment {
     private ItemListActivity.SimItem sItem;
 
     /**
+     * The selected simulation
+     */
+    private SimRunner selectedSim;
+
+    /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
@@ -45,7 +50,9 @@ public class ItemDetailFragment extends Fragment {
            // Activity context = getActivity();
            // Toast toast = Toast.makeText(context, sItem.content, duration);
            // toast.show();
-
+            // TODO: save selectedSim instance and reload it to avoid copying dex on orientation change
+            if (selectedSim == null)
+                selectedSim = new SimRunner(getActivity(), sItem.abspath);
         }
     }
 
@@ -54,7 +61,6 @@ public class ItemDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_item_detail, container, false);
         if (sItem != null) {
-            SimRunner selectedSim = new SimRunner(getActivity(), sItem.abspath);
             ((TextView) rootView.findViewById(R.id.statusText)).setText(selectedSim.getDescription());
         } else {
          //   statusView.setText("ERROR while loading simulation.");
@@ -63,6 +69,5 @@ public class ItemDetailFragment extends Fragment {
 
         return rootView;
     }
-
 
 }
