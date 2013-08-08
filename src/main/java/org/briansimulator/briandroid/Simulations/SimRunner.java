@@ -5,7 +5,6 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.TextView;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,9 +13,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 
 import dalvik.system.DexClassLoader;
 
@@ -28,12 +24,14 @@ import dalvik.system.DexClassLoader;
  *
  */
 public class SimRunner extends AsyncTask<Void, String, Void> {
+
     final static String LOGID = "org.briansimulator.briandroid.Simulations.SimRunner";
     protected TextView progressText;
     Class simulationClass;
     Object simulation;
     String simulationDescription;
     Context appContext;
+    boolean isSetUp = false;
 
     // File I/O code to copy the secondary dex file from asset resource to internal storage.
     private boolean prepareDex(String dexLocation, File dexInternalStoragePath) {
@@ -87,7 +85,7 @@ public class SimRunner extends AsyncTask<Void, String, Void> {
         final File dexInternalStoragePath = new File(appContext.getDir("dex", Context.MODE_PRIVATE),
                                                         dexName);
         if (!dexInternalStoragePath.exists()) {
-            // TODO: start loading spinner
+            // TODO: loading circle
 
             if (!prepareDex(classLocationStr, dexInternalStoragePath)) {
                 Log.e(LOGID, "Caching of dex file failed!");
@@ -138,7 +136,53 @@ public class SimRunner extends AsyncTask<Void, String, Void> {
         }
         simulationClass = loadedClass;
         simulation = classInstance;
+        isSetUp = false;
     }
+
+    public boolean setupSimulation() {
+        try {
+            Method setup = simulationClass.getDeclaredMethod("setup");
+            setup.invoke(simulation, null);
+        } catch (NoSuchMethodException nsme) {
+            // TODO: Preset error box
+            Log.e(LOGID, "Class "+simulationClass.getName()+" does not implement a setup method.");
+            return false;
+        } catch (Exception e) {
+            Log.e(LOGID, "Exception thrown setting up simulation "+simulationClass.getName());
+            Log.e(LOGID, "Trace follows:");
+            e.printStackTrace();
+            return false;
+        }
+        isSetUp = true;
+        Log.d(LOGID, "Setup completed successfully for simulation "+simulationClass.getName());
+        return true;
+    }
+
+
+    public boolean run() {
+        if (!isSetUp) {
+            if (!setupSimulation()) {
+                return false;
+            }
+        }
+        try {
+            Method run = simulationClass.getDeclaredMethod("run");
+            Log.d(LOGID, "Starting run for "+simulationClass.getName());
+            run.invoke(simulation, null);
+        } catch (NoSuchMethodException nsme) {
+            // TODO: Preset error box
+            Log.e(LOGID, "Class "+simulationClass.getName()+" does not implement a run method.");
+            return false;
+        } catch (Exception e) {
+            Log.e(LOGID, "Exception thrown setting up simulation "+simulationClass.getName());
+            Log.e(LOGID, "Trace follows:");
+            e.printStackTrace();
+            return false;
+        }
+        Log.d(LOGID, "Run completed successfully for simulation "+simulationClass.getName());
+        return true;
+    }
+
 
     protected Void doInBackground(Void... _) {
         Method simSetup, simRun;

@@ -1,11 +1,14 @@
 package org.briansimulator.briandroid;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,7 +20,7 @@ import org.briansimulator.briandroid.Simulations.SimRunner;
  * in two-pane mode (on tablets) or a {@link ItemDetailActivity}
  * on handsets.
  */
-public class ItemDetailFragment extends Fragment {
+public class ItemDetailFragment extends Fragment implements View.OnClickListener {
     /**
      * The fragment argument representing the item ID that this fragment
      * represents.
@@ -51,8 +54,9 @@ public class ItemDetailFragment extends Fragment {
            // Toast toast = Toast.makeText(context, sItem.content, duration);
            // toast.show();
             // TODO: save selectedSim instance and reload it to avoid copying dex on orientation change
-            if (selectedSim == null)
+            if (selectedSim == null) {
                 selectedSim = new SimRunner(getActivity(), sItem.abspath);
+            }
         }
     }
 
@@ -60,14 +64,47 @@ public class ItemDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_item_detail, container, false);
-        if (sItem != null) {
-            ((TextView) rootView.findViewById(R.id.statusText)).setText(selectedSim.getDescription());
+        TextView statusView = ((TextView) rootView.findViewById(R.id.statusText));
+        if (sItem != null && selectedSim != null) {
+            statusView.setText(selectedSim.getDescription());
+            // should this be part of the constructor?
+            selectedSim.setProgressView(statusView);
+            Button setupButton = (Button)rootView.findViewById(R.id.buttonSetup);
+            setupButton.setOnClickListener(this);
+            Button runButton = (Button)rootView.findViewById(R.id.buttonRun);
+            runButton.setOnClickListener(this);
+
         } else {
-         //   statusView.setText("ERROR while loading simulation.");
+            statusView.setText("ERROR while loading simulation.");
+        }
+        return rootView;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        // TODO: Save state (avoid reloading and copying dex file)
+    }
+
+    // Implement the OnClickListener callback
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.buttonSetup:
+                if (!selectedSim.setupSimulation()) {
+                    // TODO: popup error message
+                }
+                break;
+            case R.id.buttonRun:
+                if (!selectedSim.run()) {
+                    // TODO: popup error message
+                }
+                break;
         }
 
 
-        return rootView;
     }
+
+
 
 }
