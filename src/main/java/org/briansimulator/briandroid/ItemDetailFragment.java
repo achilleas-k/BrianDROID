@@ -38,6 +38,10 @@ public class ItemDetailFragment extends Fragment implements View.OnClickListener
     private SimRunner selectedSim;
 
     /**
+     * Text view for reporting simulation status
+     */
+    private TextView statusView;
+    /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
@@ -64,7 +68,7 @@ public class ItemDetailFragment extends Fragment implements View.OnClickListener
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_item_detail, container, false);
-        TextView statusView = ((TextView) rootView.findViewById(R.id.statusText));
+        statusView = ((TextView) rootView.findViewById(R.id.statusText));
         if (sItem != null && selectedSim != null) {
             statusView.setText(selectedSim.getDescription());
             // should this be part of the constructor?
@@ -91,13 +95,18 @@ public class ItemDetailFragment extends Fragment implements View.OnClickListener
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.buttonSetup:
-                if (!selectedSim.setupSimulation()) {
+                prependStatus("Setting up simulation ...");
+                if (selectedSim.setupSimulation()) {
+                    prependStatus("Simulation has been set up and is ready to run!");
+                } else {
                     // TODO: popup error message
+                    prependStatus("ERROR SETTING UP SIMULATION\n\n----");
                 }
                 break;
             case R.id.buttonRun:
-                if (!selectedSim.run()) {
-                    // TODO: popup error message
+                prependStatus("Running simulation ...");
+                if (selectedSim.run()) {
+                    setStatus("DONE!");
                 }
                 break;
         }
@@ -105,6 +114,17 @@ public class ItemDetailFragment extends Fragment implements View.OnClickListener
 
     }
 
+    private void prependStatus(String text) {
+        CharSequence currentText = statusView.getText();
+        statusView.setText(text+"\n"+currentText);
+    }
 
+    private void appendStatus(String text) {
+        statusView.append(text+"\n");
+    }
+
+    private void setStatus(String text) {
+        statusView.setText(text);
+    }
 
 }
