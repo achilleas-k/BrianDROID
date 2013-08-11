@@ -41,6 +41,11 @@ public class ItemDetailFragment extends Fragment implements View.OnClickListener
      * Text view for reporting simulation status
      */
     private TextView statusView;
+
+    /**
+     * Root view for manipulating the UI
+     */
+    private View rootView;
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -67,7 +72,7 @@ public class ItemDetailFragment extends Fragment implements View.OnClickListener
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_item_detail, container, false);
+        rootView = inflater.inflate(R.layout.fragment_item_detail, container, false);
         statusView = ((TextView) rootView.findViewById(R.id.statusText));
         if (sItem != null && selectedSim != null) {
             statusView.setText(selectedSim.getDescription());
@@ -93,17 +98,23 @@ public class ItemDetailFragment extends Fragment implements View.OnClickListener
     // Implement the OnClickListener callback
     @Override
     public void onClick(View v) {
+        Button setupButton = (Button)rootView.findViewById(R.id.buttonSetup);
+        Button runButton = (Button)rootView.findViewById(R.id.buttonRun);
         switch (v.getId()) {
             case R.id.buttonSetup:
                 prependStatus("Setting up simulation ...");
                 if (selectedSim.setupSimulation()) {
                     prependStatus("Simulation has been set up and is ready to run!");
+                    setupButton.setEnabled(false);
+                    runButton.setText("RUN");
                 } else {
                     // TODO: popup error message
                     prependStatus("ERROR SETTING UP SIMULATION\n\n----");
                 }
                 break;
             case R.id.buttonRun:
+                setupButton.setEnabled(false);
+                runButton.setEnabled(false);
                 prependStatus("Running simulation ...");
                 if (selectedSim.run()) {
                     setStatus("DONE!");
