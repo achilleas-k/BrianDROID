@@ -3,10 +3,8 @@ BrianDROID
 
 Port of the Brian neural network simulator for Android
 
-Instructions
-------------
-
-Compiling in Android Studio
+Importing project to Android Studio
+-----------------------------------
 
 1. Clone the repository to a local directory.
 2. Create a libs directory under the repository directory and add the support-v4 library.
