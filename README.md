@@ -32,6 +32,12 @@ The following procedure should work for most simple simulations
 2. Copy all generated code to the SimTemplate found at https://raw.github.com/achilleas-k/BDsimulations/master/SimTemplate.java
     - Overwrite any existing ``setup`` or ``run`` methods.
     - Rename the class to match the filename (without the extension).
+    - Change the value of the ``_duration`` parameter to the desired duration of the simulation in seconds.
+    - You may include a description of the simulation in the ``DESCRIPTION`` string. This will appear on screen on the Android device when the simulation is selected and loaded.
+    - If the generated code includes a refractory period defined as ``not_refractory = 1 * ...``, you will need to remove the ``1 *``.
+    - Some code may require manual modification to become more sensible.
+    For example, the script may (and most likely will) put constant parameter declarations inside the for-loop which increments the time variable.
+    This works, but will obviously be much slower.
 
 3. Use the ``dex`` script found at https://raw.github.com/achilleas-k/BDsimulations/master/dex to compile the java code to dalvik dex.
     - Note the paths for javac and dx and adjust them accordingly
