@@ -38,7 +38,7 @@ The following procedure should work for most simple simulations
     - The ``-source`` and ``-target`` arguments are required when using javac version 1.7.
 
 4. Copy the resulting .dex file to the external storage of your android device.
-    - Currently, BrianDROID searches for .dex file in ``/sdcard/BrianDROIDsims/``.
+    - Currently, BrianDROID searches for .dex files in ``/sdcard/BrianDROIDsims/``.
 
 5. When BrianDROID is started, it will list the names of all .dex classes found in the directory.
 Clicking any name will bring up a view which allows for running the simulation.
