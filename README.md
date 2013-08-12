@@ -30,7 +30,7 @@ The following procedure should work for most simple simulations
     - See https://raw.github.com/achilleas-k/brian2/codegen_java/examples/HH_codegen_android.py for a working example.
 
 2. Copy all generated code to the SimTemplate found at https://raw.github.com/achilleas-k/BDsimulations/master/SimTemplate.java
-    - Overwrite any existing ``setup`` or ``run`` methods that may exist.
+    - Overwrite any existing ``setup`` or ``run`` methods.
     - Rename the class to match the filename (without the extension).
 
 3. Use the ``dex`` script found at https://raw.github.com/achilleas-k/BDsimulations/master/dex to compile the java code to dalvik dex.
