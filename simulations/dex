@@ -1,0 +1,11 @@
+#!/usr/bin/bash
+
+javafile=$1
+basename=${javafile:0:-5}
+
+classfile="$basename".class
+dexfile="$basename".dex
+
+/usr/bin/javac -source 1.6 -target 1.6 $javafile # dx doesn't support classes compiled with version 1.7
+/opt/android-sdk/build-tools/18.0.1/dx --dex  --output="$dexfile" "$classfile"
+
