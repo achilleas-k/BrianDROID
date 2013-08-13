@@ -2,6 +2,7 @@ package org.briansimulator.briandroid.Simulations;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 import dalvik.system.DexClassLoader;
 
@@ -84,14 +86,14 @@ public class SimRunner extends AsyncTask<Void, String, Void> {
         this.appContext = context;
         final File dexInternalStoragePath = new File(appContext.getDir("dex", Context.MODE_PRIVATE),
                                                         dexName);
-        if (!dexInternalStoragePath.exists()) {
+        //if (!dexInternalStoragePath.exists()) {
             // TODO: loading circle
 
             if (!prepareDex(classLocationStr, dexInternalStoragePath)) {
                 Log.e(LOGID, "Caching of dex file failed!");
                 // TODO: Error popup -- throw exception???
             }
-        }
+        //}
         Log.d(LOGID, "Loading class " + dexInternalStoragePath.toString());
         // Internal storage where the DexClassLoader writes the optimized dex file to.
         final File optimisedDexOutputPath = appContext.getDir("outdex", Context.MODE_PRIVATE);
@@ -158,6 +160,40 @@ public class SimRunner extends AsyncTask<Void, String, Void> {
         return true;
     }
 
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+
+
+    private void writeToFile(ArrayList<?>[] monitor) {
+        if (isExternalStorageWritable()) {
+            final int N = monitor.length;
+            StringBuilder dataSB = new StringBuilder();
+            for (int idx=0; idx<N; idx++) {
+                ArrayList<Double> mon_idx = (ArrayList<Double>)monitor[idx];
+                for (double mi : mon_idx) {
+                    dataSB.append(mi+" ");
+                }
+                dataSB.append("\n");
+            }
+            try {
+                File sdCard = Environment.getExternalStorageDirectory();
+                File dir = new File(sdCard.getAbsolutePath()+"/BrianDROIDout/"); //TODO: optional save path
+                dir.mkdirs();
+                String spikesFilename = "somedata";
+                File spikesFile = new File(dir, spikesFilename);
+                FileOutputStream spikesStream = new FileOutputStream(spikesFile);
+                spikesStream.write(dataSB.toString().getBytes()); // this might be inefficient
+                spikesStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     public boolean run() {
         if (!isSetUp) {
@@ -169,6 +205,10 @@ public class SimRunner extends AsyncTask<Void, String, Void> {
             Method run = simulationClass.getDeclaredMethod("run");
             Log.d(LOGID, "Starting run for "+simulationClass.getName());
             run.invoke(simulation, null);
+            Log.d(LOGID, "Simulation complete. Saving data ...");
+            Method getMonitor = simulationClass.getDeclaredMethod("getRecordings");
+            ArrayList<Double>[] monitor = (ArrayList<Double>[])getMonitor.invoke(simulation, null);
+            writeToFile(monitor);
         } catch (NoSuchMethodException nsme) {
             // TODO: Preset error box
             Log.e(LOGID, "Class "+simulationClass.getName()+" does not implement a run method.");
