@@ -10,7 +10,7 @@ import android.renderscript.RenderScript;
 /**
  * Created by achilleas on 15/07/13.
  */
-public class StUpdateBenchmark {
+public class RenderscriptTest {
 
     final static Random rng = new Random();
     final float _duration = 0.5f;
@@ -19,7 +19,7 @@ public class StUpdateBenchmark {
     float progress;
 
     private String simulationStatus;
-    private final String DESCRIPTION = "THE RENDERSCRIPT BENCHMARK";
+    private final String DESCRIPTION = "THE RENDERSCRIPT CLASS";
 
     // renderscript engine objects
     private RenderScript mRS;
