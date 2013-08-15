@@ -16,10 +16,13 @@ then
     javac_status=${PIPESTATUS[0]}
     if [ $javac_status == 0 ];
     then
-        /opt/android-sdk/build-tools/18.0.1/dx --dex  --output="$dexfile" "$classfile"
+        /opt/android-sdk/build-tools/18.0.1/dx --dex --output="$dexfile" "$classfile"
     else
         echo "javac failed."
     fi
 else
     echo "renderscript compile failed."
 fi
+
+
+
