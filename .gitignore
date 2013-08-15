@@ -26,3 +26,7 @@ libs/
 .idea
 
 .gradle
+
+# vim swap files
+*.swp
+
