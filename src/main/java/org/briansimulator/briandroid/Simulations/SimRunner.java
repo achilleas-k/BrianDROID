@@ -220,17 +220,16 @@ public class SimRunner extends AsyncTask<Void, String, Void> {
         Log.d(LOGID, "Run completed successfully for simulation "+simulationClass.getName());
         Log.d(LOGID, "Saving data ...");
         try {
+            // TODO: Should handle monitors intelligently
             Method getMonitor = simulationClass.getDeclaredMethod("getRecordings");
             ArrayList<Double>[] monitor = (ArrayList<Double>[])getMonitor.invoke(simulation, null);
             writeToFile(monitor);
         } catch (NoSuchMethodException nsme) {
             Log.e(LOGID, "Class "+simulationClass.getName()+" does not implement a getRecordings method.");
-            return false;
         } catch (Exception e) {
             Log.e(LOGID, "Exception thrown reading data from class "+simulationClass.getName());
             Log.e(LOGID, "Trace follows:");
             e.printStackTrace();
-            return false;
         }
 
         return true;
