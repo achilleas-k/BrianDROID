@@ -7,16 +7,18 @@ basename=${javafile:0:-5}
 classfile="$basename".class
 dexfile="$basename".dex
 
-# TODO: make the renderscript compile command dynamic
+# paths are static, perhaps we can detect them automatically
 llvm-rs-cc -emit-bc stupdate.rs -o . -allow-rs-prefix -I/opt/android-sdk/build-tools/18.0.1/renderscript/include/ -I/opt/android-sdk/build-tools/18.0.1/renderscript/clang-include/
 llvm_status=${PIPESTATUS[0]}
 if [ $llvm_status == 0 ];
 then
     /usr/bin/javac -cp "/opt/android-sdk/platforms/android-18/*:." -source 1.6 -target 1.6 $javafile # dx doesn't support classes compiled with version 1.7
+    mv $classfile BDStandalone/$classfile
+    classfile=BDStandalone/$classfile
     javac_status=${PIPESTATUS[0]}
     if [ $javac_status == 0 ];
     then
-        /opt/android-sdk/build-tools/18.0.1/dx --dex --output="$dexfile" "$classfile"
+        /opt/android-sdk/build-tools/18.0.1/dx --dex --output="$dexfile" "$classfile" "./BDStandalone/ScriptC_stupdate.class" # static for now
     else
         echo "javac failed."
     fi
