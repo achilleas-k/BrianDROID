@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
@@ -17,7 +17,7 @@ import android.util.Log;
 /**
  * The base code generation template for BrianDROID simulations
  */
-public class CodegenTemplate {
+public class CodegenTemplate { //extends AsyncTask<Void, String, Void> {
 
     private final static String LOGID = "org.briansimulator.briandroidtemplate.CodegenTemplate";
     Context bdContext;
@@ -91,6 +91,8 @@ public class CodegenTemplate {
     Allocation out;
 
     public void setup() {
+        _duration = 1;
+        dt = 0.0001f;
         mRS = RenderScript.create(bdContext);
         mScript = new ScriptC_stateupdate(mRS);
         // SIMULATION PARAMS (N and dt)
@@ -129,12 +131,14 @@ public class CodegenTemplate {
 
 
         idx_allocation = Allocation.createSized(mRS, Element.I32(mRS), 100);
+        out = Allocation.createSized(mRS, Element.I32(mRS), 100);
         Log.d(LOGID, "Memory allocation and binding complete.");
     }
 
 
     //*********** MAIN LOOP *************
     public void run() {
+        Log.d(LOGID, "Starting run code ...");
         int nsteps = (int)(_duration/dt);
         int[] idx_arr = new int[100];
         for (int idx=0; idx<100; idx++) {

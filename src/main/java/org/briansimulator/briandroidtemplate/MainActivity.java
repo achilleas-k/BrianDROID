@@ -3,6 +3,8 @@ package org.briansimulator.briandroidtemplate;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
@@ -11,13 +13,29 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Button runButton = (Button) findViewById(R.id.runButton);
+        runButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startSimulation();
+            }
+        });
+
+    }
+
+    protected void startSimulation() {
         CodegenTemplate rstest = new CodegenTemplate();
         rstest.setAppContext(getApplicationContext());
-        rstest.setStatusText("FOO");
-        rstest.setup();
-        rstest.run();
         TextView status = (TextView)findViewById(R.id.statusTextView);
-        status.setText("SIMULATION FINISHED!\n");
+        status.setText("Setting up simulation ...");
+        //status.refreshDrawableState();
+        rstest.setup();
+        status.append(" DONE!\n");
+        status.append("Running simulation ...");
+        //status.invalidate();
+        rstest.run();
+        status.append("SIMULATION FINISHED!\n");
+        //status.invalidate();
     }
 
 
@@ -27,5 +45,6 @@ public class MainActivity extends Activity {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
-    
+
+
 }

@@ -9,9 +9,21 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/hello_world"
-        android:id="@+id/statusTextView"/>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/statusTextView"
+        android:layout_marginTop="70dp"
+        android:layout_alignParentTop="true"
+            />
+
+    <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="RUN"
+            android:id="@+id/runButton"
+            android:layout_alignParentTop="true"
+            android:layout_alignLeft="@+id/statusTextView"
+            android:layout_marginLeft="13dp"
+            android:layout_marginTop="13dp"/>
 
 </RelativeLayout>
