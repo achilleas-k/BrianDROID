@@ -15,24 +15,23 @@ import android.util.Log;
 
 
 /**
- * Created by achilleas on 15/07/13.
+ * The base code generation template for BrianDROID simulations
  */
-public class RenderscriptTest {
+public class CodegenTemplate {
 
-    private final static String LOGID = "org.briansimulator.briandroidtemplate.RenderscriptTest";
+    private final static String LOGID = "org.briansimulator.briandroidtemplate.CodegenTemplate";
     Context bdContext;
-    final static Random rng = new Random();
-    final float _duration = 2.0f;
-    final float dt = 0.0001f;
+    float _duration;
+    float dt;
     float t;
     float progress;
 
     private String simulationStatus;
-    private final String DESCRIPTION = "THE RENDERSCRIPT CLASS";
+    private final String DESCRIPTION = "%%% SIMULATION DESCRIPTION %%%";
 
     // renderscript engine objects
     private RenderScript mRS;
-    private ScriptC_stupdate mScript;
+    private ScriptC_stateupdate mScript;
 
     public void setAppContext(Context bdctx) {
         this.bdContext = bdctx;
@@ -68,7 +67,13 @@ public class RenderscriptTest {
     }
 
 
-    //*********** GLOBAL VARS **********
+    //*********** %% GLOBAL VARS %% **********//
+    /*
+     * For each state variable:
+     * type[] %%VARNAME%%;
+     * Allocation %%VARNAME%%_rs;
+     *
+     */
     double[] _array_gp_I;
     double[] _array_gp_v;
     double[] _array_gp_h;
@@ -85,16 +90,28 @@ public class RenderscriptTest {
     Allocation idx_allocation;
     Allocation out;
 
-    private void createScript() {
-        System.out.println("Starting createScrtipt ...");
+    public void setup() {
         mRS = RenderScript.create(bdContext);
-        System.out.println("mRS initialised ...");
-        mScript = new ScriptC_stupdate(mRS);
-        System.out.println("mScript initialised!");
+        mScript = new ScriptC_stateupdate(mRS);
+        // SIMULATION PARAMS (N and dt)
         mScript.set_numNeurons(100);
         mScript.set_dt(dt);
-        System.out.println("Script created ...");
-        System.out.println("Allocating memory ...");
+
+        /*
+         * For each state variable:
+         * %%VARNAME%% = new type[N];
+         * %%VARNAME%%_rs = Allocation.createSized(mRS, Element.%RSTYPE%(mRS), N);
+         * mScript.bind_%%VARNAME%%(%%VARNAME%%_rs);
+         *
+         * where %RSTYPE% is the renderscript type that corresponds to ``type``
+         *
+         */
+        _array_gp_I = new double [100];
+        _array_gp_v = new double [100];
+        _array_gp_h = new double [100];
+        _array_gp_n = new double [100];
+        _array_gp_m = new double [100];
+        _array_gp_not_refractory = new boolean [100];
 
         _array_gp_I_rs = Allocation.createSized(mRS, Element.F32(mRS),  100);
         _array_gp_v_rs = Allocation.createSized(mRS, Element.F32(mRS),  100);
@@ -111,79 +128,41 @@ public class RenderscriptTest {
         mScript.bind_array_gp_not_refractory(_array_gp_not_refractory_rs);
 
 
-
-        // the following are probably not necessary
         idx_allocation = Allocation.createSized(mRS, Element.I32(mRS), 100);
-        out = Allocation.createSized(mRS, Element.I32(mRS), 100);
-        System.out.println("Memory allocation complete!");
+        Log.d(LOGID, "Memory allocation and binding complete.");
     }
 
-    //*********** SETUP METHOD *********
-    public void setup() {
-        _array_gp_I = new double [100];
-        _array_gp_v = new double [100];
-        _array_gp_h = new double [100];
-        _array_gp_n = new double [100];
-        _array_gp_m = new double [100];
-        _array_gp_not_refractory = new boolean [100];
 
-        createScript();
-    }
-
-    long fullParallelVarsDuration;
-    long serialVarsDuration;
-    public long getFullParallelVarsDuration() {
-        return fullParallelVarsDuration;
-    }
-    public long getSerialVarsDuration() {
-        return serialVarsDuration;
-    }
     //*********** MAIN LOOP *************
     public void run() {
         int nsteps = (int)(_duration/dt);
-        int t_int;
-        float[][] vrec = new float[nsteps][100];
         int[] idx_arr = new int[100];
         for (int idx=0; idx<100; idx++) {
             idx_arr[idx] = idx;
         }
         idx_allocation.copyFrom(idx_arr);
-        t_int = 0;
         float[] zeros = new float[100];
         Arrays.fill(zeros, 0f);
+        /*
+         * For each state variable:
+         * %%VARNAME%%_rs.copyFrom(zeros);
+         *
+         *
+         * This is for initialising all state vars to zero.
+         * May be redundant or unnecessary.
+         *
+         */
         _array_gp_I_rs.copyFrom(zeros);
         _array_gp_v_rs.copyFrom(zeros);
         _array_gp_h_rs.copyFrom(zeros);
         _array_gp_n_rs.copyFrom(zeros);
         _array_gp_m_rs.copyFrom(zeros);
-        Log.d(LOGID, "Starting serial state updating");
-        long start = System.currentTimeMillis();
-        for (t=0; t<_duration; t+=dt) {
-            mScript.forEach_updateall(idx_allocation, out);
-            mRS.finish();
-        }
-        serialVarsDuration = System.currentTimeMillis()-start;
-        Log.d(LOGID, "Finished serial state updating. Resetting ...");
-        zeros = new float[100];
-        Arrays.fill(zeros, 0f);
-        _array_gp_I_rs.copyFrom(zeros);
-        _array_gp_v_rs.copyFrom(zeros);
-        _array_gp_h_rs.copyFrom(zeros);
-        _array_gp_n_rs.copyFrom(zeros);
-        _array_gp_m_rs.copyFrom(zeros);
-        Log.d(LOGID, "Starting parallel state updating");
-        start = System.currentTimeMillis();
-        for (t=0; t<_duration; t+=dt) {
-            mScript.forEach_hupdate(idx_allocation, out);
-            mScript.forEach_mupdate(idx_allocation, out);
-            mScript.forEach_vupdate(idx_allocation, out);
-            mScript.forEach_nupdate(idx_allocation, out);
-            mRS.finish();
 
+        for (t=0; t<_duration; t+=dt) {
+            mScript.forEach_update(idx_allocation, out);
+            mRS.finish();
         }
-        fullParallelVarsDuration = System.currentTimeMillis()-start;
         Log.d(LOGID, "DONE!");
-        //writeToFile(vrec, "renderscriptv");
 
     }
 
