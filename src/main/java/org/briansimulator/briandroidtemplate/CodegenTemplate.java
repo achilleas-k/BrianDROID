@@ -74,23 +74,32 @@ public class CodegenTemplate { //extends AsyncTask<Void, String, Void> {
      * Allocation %%VARNAME%%_rs;
      *
      */
-    double[] _array_gp_I;
-    double[] _array_gp_v;
-    double[] _array_gp_h;
-    double[] _array_gp_n;
-    double[] _array_gp_m;
-    boolean[] _array_gp_not_refractory;
-    Allocation _array_gp_I_rs;
-    Allocation _array_gp_v_rs;
-    Allocation _array_gp_h_rs;
-    Allocation _array_gp_n_rs;
-    Allocation _array_gp_m_rs;
-    Allocation _array_gp_not_refractory_rs;
+
+    // JAVA ARRAY DEFINITIONS
+double[] _array_mynrngroup_I;
+double[] _array_mynrngroup_h;
+double[] _array_mynrngroup_m;
+double[] _array_mynrngroup_n;
+double[] _array_mynrngroup_v;
+boolean[] _array_mynrngroup_not_refractory;
+
+
+    // ALLOCATION DEFINITIONS
+Allocation _array_mynrngroup_I_alloc;
+Allocation _array_mynrngroup_h_alloc;
+Allocation _array_mynrngroup_m_alloc;
+Allocation _array_mynrngroup_n_alloc;
+Allocation _array_mynrngroup_v_alloc;
+Allocation _array_mynrngroup_not_refractory_alloc;
+
 
     Allocation idx_allocation;
     Allocation out;
 
     public void setup() {
+        /*
+         * duration and dt.
+         */
         _duration = 1;
         dt = 0.0001f;
         mRS = RenderScript.create(bdContext);
@@ -108,30 +117,34 @@ public class CodegenTemplate { //extends AsyncTask<Void, String, Void> {
          * where %RSTYPE% is the renderscript type that corresponds to ``type``
          *
          */
-        _array_gp_I = new double [100];
-        _array_gp_v = new double [100];
-        _array_gp_h = new double [100];
-        _array_gp_n = new double [100];
-        _array_gp_m = new double [100];
-        _array_gp_not_refractory = new boolean [100];
 
-        _array_gp_I_rs = Allocation.createSized(mRS, Element.F32(mRS),  100);
-        _array_gp_v_rs = Allocation.createSized(mRS, Element.F32(mRS),  100);
-        _array_gp_h_rs = Allocation.createSized(mRS, Element.F32(mRS),  100);
-        _array_gp_n_rs = Allocation.createSized(mRS, Element.F32(mRS),  100);
-        _array_gp_m_rs = Allocation.createSized(mRS, Element.F32(mRS),  100);
-        _array_gp_not_refractory_rs = Allocation.createSized(mRS, Element.BOOLEAN(mRS), 100);
-
-        mScript.bind_array_gp_I(_array_gp_I_rs);
-        mScript.bind_array_gp_v(_array_gp_v_rs);
-        mScript.bind_array_gp_h(_array_gp_h_rs);
-        mScript.bind_array_gp_n(_array_gp_n_rs);
-        mScript.bind_array_gp_m(_array_gp_m_rs);
-        mScript.bind_array_gp_not_refractory(_array_gp_not_refractory_rs);
+        // JAVA ARRAY INITIALISATIONS
+_array_mynrngroup_I = new double[100];
+_array_mynrngroup_h = new double[100];
+_array_mynrngroup_m = new double[100];
+_array_mynrngroup_n = new double[100];
+_array_mynrngroup_v = new double[100];
+_array_mynrngroup_not_refractory = new boolean[100];
 
 
-        idx_allocation = Allocation.createSized(mRS, Element.I32(mRS), 100);
-        out = Allocation.createSized(mRS, Element.I32(mRS), 100);
+        // ALLOCATION INITIALISATIONS
+_array_mynrngroup_I_alloc = Allocation.createSized(mRS, Element.F64(mRS), 100);
+_array_mynrngroup_h_alloc = Allocation.createSized(mRS, Element.F64(mRS), 100);
+_array_mynrngroup_m_alloc = Allocation.createSized(mRS, Element.F64(mRS), 100);
+_array_mynrngroup_n_alloc = Allocation.createSized(mRS, Element.F64(mRS), 100);
+_array_mynrngroup_v_alloc = Allocation.createSized(mRS, Element.F64(mRS), 100);
+_array_mynrngroup_not_refractory_alloc = Allocation.createSized(mRS, Element.BOOLEAN(mRS), 100);
+
+
+        // MEMORY BINDINGS
+mScript.bind_array_mynrngroup_I(_array_mynrngroup_I_alloc);
+mScript.bind_array_mynrngroup_h(_array_mynrngroup_h_alloc);
+mScript.bind_array_mynrngroup_m(_array_mynrngroup_m_alloc);
+mScript.bind_array_mynrngroup_n(_array_mynrngroup_n_alloc);
+mScript.bind_array_mynrngroup_v(_array_mynrngroup_v_alloc);
+mScript.bind_array_mynrngroup_not_refractory(_array_mynrngroup_not_refractory_alloc);
+
+
         Log.d(LOGID, "Memory allocation and binding complete.");
     }
 
@@ -156,11 +169,6 @@ public class CodegenTemplate { //extends AsyncTask<Void, String, Void> {
          * May be redundant or unnecessary.
          *
          */
-        _array_gp_I_rs.copyFrom(zeros);
-        _array_gp_v_rs.copyFrom(zeros);
-        _array_gp_h_rs.copyFrom(zeros);
-        _array_gp_n_rs.copyFrom(zeros);
-        _array_gp_m_rs.copyFrom(zeros);
 
         for (t=0; t<_duration; t+=dt) {
             mScript.forEach_update(idx_allocation, out);
