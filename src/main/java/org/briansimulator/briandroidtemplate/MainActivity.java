@@ -24,17 +24,18 @@ public class MainActivity extends Activity {
     }
 
     protected void startSimulation() {
-        CodegenTemplate rstest = new CodegenTemplate();
-        rstest.setAppContext(getApplicationContext());
+        CodegenTemplate brianSimulation = new CodegenTemplate();
+        brianSimulation.setAppContext(getApplicationContext());
         TextView status = (TextView)findViewById(R.id.statusTextView);
         status.setText("Setting up simulation ...");
         //status.refreshDrawableState();
-        rstest.setup();
+        brianSimulation.setup();
         status.append(" DONE!\n");
         status.append("Running simulation ...");
         //status.invalidate();
-        rstest.run();
+        brianSimulation.run();
         status.append("SIMULATION FINISHED!\n");
+        status.append("The simulation run time was "+brianSimulation.getRuntimeDuration()+ "ms.");
         //status.invalidate();
     }
 
