@@ -33,7 +33,13 @@ public class MainActivity extends Activity {
         status.append(" DONE!\n");
         status.append("Running simulation ...");
         //status.invalidate();
-        brianSimulation.run();
+        brianSimulation.execute();
+        CharSequence thetext = status.getText();
+        String simStatus;
+        while (brianSimulation.getSimState() < 2) {
+            simStatus = brianSimulation.getStatusText();
+            status.setText(thetext+"\n"+simStatus);
+        }
         status.append("SIMULATION FINISHED!\n");
         status.append("The simulation run time was "+brianSimulation.getRuntimeDuration()+ "ms.");
         //status.invalidate();
