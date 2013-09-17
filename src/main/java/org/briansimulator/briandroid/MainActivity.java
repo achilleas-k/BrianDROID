@@ -1,4 +1,4 @@
-package org.briansimulator.briandroidtemplate;
+package org.briansimulator.briandroid;
 
 import android.os.Bundle;
 import android.app.Activity;
@@ -24,7 +24,7 @@ public class MainActivity extends Activity {
     }
 
     protected void startSimulation() {
-        CodegenTemplate brianSimulation = new CodegenTemplate();
+        Simulation brianSimulation = new Simulation();
         brianSimulation.setAppContext(getApplicationContext());
         TextView statusView = (TextView)findViewById(R.id.statusTextView);
         brianSimulation.setStatusTextView(statusView);

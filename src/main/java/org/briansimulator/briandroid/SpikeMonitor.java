@@ -1,4 +1,4 @@
-package org.briansimulator.briandroidtemplate;
+package org.briansimulator.briandroid;
 
 import java.util.ArrayList;
 
