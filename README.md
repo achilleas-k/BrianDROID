@@ -1,20 +1,20 @@
 BrianDROID
 ==========
 
-BrianDROID offers a template application which is used by brian2's code generation to create a working Android app for running neural network simulations.
-Brian2's android\_standalone submodule is required to create runnable simulations for BrianDROID, which is currently available in the devices\_android branch of brian2, https://github.com/achilleas-k/brian2/tree/devices_android .
+BrianDROID offers a template application which is used by Brian2's code generation to create a working Android app for running neural network simulations.
+Brian2's android\_standalone submodule is required to create runnable simulations for BrianDROID, which is currently available in the devices\_android branch of Brian2, https://github.com/achilleas-k/Brian2/tree/devices_android .
 The branch also contains example scripts for generating Android code (android\_example.py).
 
 Generating code
 --------------
-Any brian2 script which defines ``set_device('android')`` at the top will generate code that will run in BrianDROID (some limitations exist; see the [wiki page](https://github.com/achilleas-k/BrianDROID/wiki/Limitations)).
+Any Brian2 script which defines ``set_device('android')`` at the top will generate code that will run in BrianDROID (some limitations exist; see the [wiki page](https://github.com/achilleas-k/BrianDROID/wiki/Limitations)).
 When the script is run, it creates an ``output`` directory in the current working directory and saves 2 files:
 
 - **Simulation.java** : The main simulation class file which is responsible for setting up the simulation, allocating memory (defining arrays, monitors, etc.), initialising the renderscript engine and calling the renderscript kernels every timestep.
 - **renderscript.rs** : A renderscript file which contains functions for updating the state variables every time step. This is where the simulation state update equations, thresholding and resetting functions are defined.
 
 The two files should be moved/copied to BrianDROID and the existing files with the same names should be overwritten.
-The existing files are copies of the templates used to generate the code, which can also be found in the devices\_android branch of brian2.
+The existing files are copies of the templates used to generate the code, which can also be found in the devices\_android branch of Brian2.
 
 File locations in BrianDROID project:
 
