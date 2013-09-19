@@ -1,7 +1,7 @@
 BrianDROID
 ==========
 
-BrianDROID offers a generic template which is used by brian2's code generation to create a working Android app for running a specific simulation.
+BrianDROID offers a template application which is used by brian2's code generation to create a working Android app for running neural network simulations.
 Brian2's android\_standalone submodule is required to create runnable simulations for BrianDROID, which is currently available in the devices\_android branch of brian2, https://github.com/achilleas-k/brian2/tree/devices_android .
 The branch also contains example scripts for generating Android code (android\_example.py).
 
