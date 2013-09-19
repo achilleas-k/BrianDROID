@@ -28,8 +28,14 @@ public class SpikeMonitor {
     public ArrayList<Spike> spikes;
     public int nspikes = 0;
     public int max_idx = 0;
+    public String groupName = "";
 
     public SpikeMonitor() {
+        this.spikes = new ArrayList<Spike>();
+    }
+
+    public SpikeMonitor(String name) {
+        this.groupName = name;
         this.spikes = new ArrayList<Spike>();
     }
 
