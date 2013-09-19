@@ -79,10 +79,11 @@ public class Simulation extends AsyncTask<Void, String, Void> {
 
     //*********** GLOBAL VARS **********//
 
+    ArrayList<SpikeMonitor> monitors = new ArrayList<SpikeMonitor>();
     {{ arrays }}
 
     public void setup() {
-        publishProgress("Setting up simulation ...");
+        publishProgress("Setting up simulation ... ");
         mRS = RenderScript.create(bdContext);
         mScript = new ScriptC_renderscript(mRS);
 
@@ -91,67 +92,6 @@ public class Simulation extends AsyncTask<Void, String, Void> {
 
         Log.d(LOGID, "Memory allocation and binding complete.");
         publishProgress("DONE!\n");
-    }
-
-    public boolean isExternalStorageWritable() {
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-        return false;
-    }
-
-    private void writeToFile(float[][] monitor, String filename) {
-        Log.d(LOGID, "Writing to file "+filename);
-        if (isExternalStorageWritable()) {
-            final int N = monitor.length;
-            StringBuilder dataSB = new StringBuilder();
-            for (int idx=0; idx<N; idx++) {
-                float[] mon_idx = monitor[idx];
-                for (double mi : mon_idx) {
-                    dataSB.append(mi+" ");
-                }
-                dataSB.append("\n");
-            }
-            try {
-                File sdCard = Environment.getExternalStorageDirectory();
-                File dir = new File(sdCard.getAbsolutePath()+"/BrianDROIDout/"); //TODO: optional save path
-                dir.mkdirs();
-                File spikesFile = new File(dir, filename);
-                FileOutputStream spikesStream = new FileOutputStream(spikesFile);
-                spikesStream.write(dataSB.toString().getBytes()); // this might be inefficient
-                spikesStream.close();
-                Log.d(LOGID, "DONE!");
-            } catch (Exception e) {
-                Log.e(LOGID, "File write failed!");
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void writeToFile(ArrayList<?>[] monitor, String filename) {
-        if (isExternalStorageWritable()) {
-            final int N = monitor.length;
-            StringBuilder dataSB = new StringBuilder();
-            for (int idx=0; idx<N; idx++) {
-                ArrayList<Double> mon_idx = (ArrayList<Double>)monitor[idx];
-                for (double mi : mon_idx) {
-                    dataSB.append(mi+" ");
-                }
-                dataSB.append("\n");
-            }
-            try {
-                File sdCard = Environment.getExternalStorageDirectory();
-                File dir = new File(sdCard.getAbsolutePath()+"/BrianDROIDout/"); //TODO: optional save path
-                dir.mkdirs();
-                File spikesFile = new File(dir, filename);
-                FileOutputStream spikesStream = new FileOutputStream(spikesFile);
-                spikesStream.write(dataSB.toString().getBytes()); // this might be inefficient
-                spikesStream.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     @Override
@@ -167,23 +107,31 @@ public class Simulation extends AsyncTask<Void, String, Void> {
 
     //*********** MAIN LOOP *************
     public void run() {
-        publishProgress("Starting main run code ...\n");
+        publishProgress("Initialising ... \n");
         Log.d(LOGID, "Starting run code ...");
         simstate = 1;
         {{ idx_initialisations }}
-        publishProgress("Starting state updater loop ...\n");
+        {{ monitor_listing }}
+        publishProgress("Running simulation ... ");
         long sim_start = System.currentTimeMillis();
         for (t=0; t<_duration; t+=dt) {
             mScript.set_t(t);
             {{ kernel_calls }}
-            mRS.finish();
         }
         publishProgress("Simulation complete!\n");
         runtimeDuration = System.currentTimeMillis()-sim_start;
         Log.d(LOGID, "DONE!");
+        // NOTE: Spike monitor name is not handled by template
+        if (monitors.size() > 0) {
+            for (SpikeMonitor mon : monitors) {
+                publishProgress("Neuron group "+mon.groupName+" fired "+mon.nspikes+".\n");
+                publishProgress("Saving recorded spikes ... ");
+                mon.writeToFile(mon.groupName+"_spikemonitor.txt");
+                publishProgress("DONE!\n");
+            }
+        }
         publishProgress("Main loop run time: "+runtimeDuration+" ms\n");
         simstate = 2;
-
     }
 
 
