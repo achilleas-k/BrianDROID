@@ -85,16 +85,6 @@ public class SpikeMonitor {
         return i_spikes;
     }
 
-    public ArrayList<Float>[] getSpikeArray() {
-        ArrayList<Float>[] spikeArray = new ArrayList[max_idx];
-        for (int idx=0; idx<this.max_idx; idx++) {
-            // this is stupid
-            spikeArray[idx] = this.getSpikes(idx);
-        }
-        return spikeArray;
-    }
-
-
     private boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
@@ -136,6 +126,8 @@ public class SpikeMonitor {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        } else {
+            Log.w(LOGID, "External storage is not writable. Aborting save.");
         }
     }
 
