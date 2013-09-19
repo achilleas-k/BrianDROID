@@ -10,16 +10,16 @@ Generating code
 Any brian2 script which defines ``set_device('android')`` at the top will generate code that will run in BrianDROID (some limitations exist; see below).
 When the script is run, it creates an ``output`` directory in the current working directory and saves 2 files:
 
-    - **Simulation.java** : The main simulation class file which is responsible for setting up the simulation, allocating memory (defining arrays, monitors, etc.), initialising the renderscript engine and calling the renderscript kernels every timestep.
-    - **renderscript.rs** : A renderscript file which contains functions for updating the state variables every time step. This is where the simulation state update equations, thresholding and resetting functions are defined.
+- **Simulation.java** : The main simulation class file which is responsible for setting up the simulation, allocating memory (defining arrays, monitors, etc.), initialising the renderscript engine and calling the renderscript kernels every timestep.
+- **renderscript.rs** : A renderscript file which contains functions for updating the state variables every time step. This is where the simulation state update equations, thresholding and resetting functions are defined.
 
 The two files should be moved/copied to BrianDROID and the existing files with the same names should be overwritten.
 The existing files are copies of the templates used to generate the code, which can also be found in the devices\_android branch of brian2.
 
 File locations in BrianDROID project:
 
-    - **Simulation.java**: `<BrianDROID root>/src/main/java/org/briansimulator/briandroid/Simulation.java`
-    - **renderscript.rs**: `<BrianDROID root>/src/main/rs/renderscript.rs`
+- **Simulation.java**: `<BrianDROID root>/src/main/java/org/briansimulator/briandroid/Simulation.java`
+- **renderscript.rs**: `<BrianDROID root>/src/main/rs/renderscript.rs`
 
 Building BrianDROID
 -------------------
