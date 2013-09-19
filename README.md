@@ -7,7 +7,7 @@ The branch also contains example scripts for generating Android code (android\_e
 
 Generating code
 --------------
-Any brian2 script which defines ``set_device('android')`` at the top will generate code that will run in BrianDROID (some limitations exist; see below).
+Any brian2 script which defines ``set_device('android')`` at the top will generate code that will run in BrianDROID (some limitations exist; see the [wiki page](https://github.com/achilleas-k/BrianDROID/wiki/Limitations)).
 When the script is run, it creates an ``output`` directory in the current working directory and saves 2 files:
 
 - **Simulation.java** : The main simulation class file which is responsible for setting up the simulation, allocating memory (defining arrays, monitors, etc.), initialising the renderscript engine and calling the renderscript kernels every timestep.
@@ -25,7 +25,7 @@ Building BrianDROID
 -------------------
 Once the generated files are in their appropriate locations, the project can be compiled to generate an Android APK that will run the simulation on the device.
 The project can be imported into Eclipse or Android Studio.
-BrianDROID also contains a ``build.gradle`` file so one can build an apk using gradle directly by running ``gradle build`` in the BrianDROID project root.
+BrianDROID also contains a ``build.gradle`` file so one can build an APK file using gradle directly by running ``gradle build`` in the BrianDROID project root.
 Note the required versions for Android SDK and build tools defined in the file when building.
 
 Importing project to Android Studio
@@ -38,7 +38,7 @@ Importing project to Android Studio
 Installing and Running on Android
 ---------------------------------
 When building using Android Studio, the build process automatically attempts to push the compiled APK to a connected device (USB debugging must be enabled on the device).
-Alternatively, a virtual (emulated) device can be created and used, which can be useful for testing.
+Alternatively, a virtual (emulated) device can be created and used, which may be useful for testing.
 
 If the APK was built using gradle or any other method that doesn't automate the installation, the compiled APK can be found in `<BrianDROID root>/build/apk/`.
 This can be installed using one of several methods:
@@ -48,8 +48,11 @@ This can be installed using one of several methods:
 
 Note that the apk directory should contain two files, ``BrianDROID-debug-unaligned.apk`` and ``BrianDROID-release-unsigned.apk``.
 The former is automatically signed during the build process by the debug key.
-Since Android apps must be signed to be installed, this allows the app to be installed without issue.
-Since the app isn't meant for distribution, there is no need to go through the signing process.
+Since Android apps must be signed to be installed, the unsigned APK will fail to install and debug-unaligned file allows the app to be installed without issue.
+Debug signed files should never be used for distribution.
+Since the app isn't meant for official distribution, there is no need to go through the signing process.
+
+One may wish to zipalign the APK before installing by running ``zipalign -f -v 4 build/apk/BrianDROID-debug-unaligned.apk ./BrianDROID.apk`` (see http://developer.android.com/tools/help/zipalign.html ) and installing the resulting aligned file instead.
 
 
 
