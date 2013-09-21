@@ -63,5 +63,5 @@ See the [INCF project page](http://www.incf.org/gsoc/2013/briandroid-neural-simu
 
 --------
 All code is licensed under the CeCILL free software license.
-A copy of the license can be found in the root of the repository in the [LICENSE](https://raw.github.com/achilleas-k/BrianDROID/master/LICENSE) file.
+A copy of the license can be found in the [LICENSE](https://raw.github.com/achilleas-k/BrianDROID/master/LICENSE) file in the root of the repository.
 
