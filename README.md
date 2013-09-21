@@ -3,7 +3,7 @@ BrianDROID
 
 BrianDROID offers a template application which is used by Brian2's code generation to create a working Android app for running neural network simulations.
 Brian2's android\_standalone submodule is required to create runnable simulations for BrianDROID, which is currently available in the devices\_android branch of Brian2, https://github.com/achilleas-k/Brian2/tree/devices_android .
-The branch also contains example scripts for generating Android code (android\_example.py).
+The branch also contains example scripts for generating Android code (briandroid\_LIF\_example.py, briandroid\_HH\_example.py, briandroid\_IF\_curve.py).
 
 Generating code
 --------------
@@ -53,6 +53,10 @@ Debug signed files should never be used for distribution.
 Since the app isn't meant for official distribution, there is no need to go through the signing process.
 
 One may wish to zipalign the APK before installing by running ``zipalign -f -v 4 build/apk/BrianDROID-debug-unaligned.apk ./BrianDROID.apk`` (see http://developer.android.com/tools/help/zipalign.html ) and installing the resulting aligned file instead.
+
+BrianDROID is a Google Summer of Code, 2013 project under the support of the [INCF](http://www.incf.org/) (as a mentoring organisation) and the two project mentors, Marcel Stimberg and Dan Goodman.
+
+See the [INCF project page](http://www.incf.org/gsoc/2013/briandroid-neural-simulation-on-mobile-devices) and the [GSoC project page](http://www.google-melange.com/gsoc/project/google/gsoc2013/achilleask/24002) for the original project description.
 
 
 
