@@ -35,6 +35,11 @@ Importing project to Android Studio
 3. Select the root of the cloned repository.
 4. Default settings on the subsequent dialogs should require no change.
 
+Note that a recent version of Android Studio is recommended.
+Given that the IDE is in active development and is still only available as an early access preview, newer versions have a better chance of working properly.
+The process has been tested and worked without issues on a cleanly installed Android Studio 0.2.9 with Android build tools 18.0.1.
+Minimum versions and minimum set of tools and libraries should be available soon.
+
 Installing and Running on Android
 ---------------------------------
 When building using Android Studio, the build process automatically attempts to push the compiled APK to a connected device (USB debugging must be enabled on the device).
