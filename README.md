@@ -47,7 +47,7 @@ This can be installed using one of several methods:
 - Install using ``adb install <filename>`` while the device is connected and USB debugging is enabled.
 
 Note that the apk directory should contain two files, ``BrianDROID-debug-unaligned.apk`` and ``BrianDROID-release-unsigned.apk``.
-The former is automatically signed during the build process by the debug key.
+The former is automatically signed during the build process using the debug key.
 Since Android apps must be signed to be installed, the unsigned APK will fail to install and debug-unaligned file allows the app to be installed without issue.
 Debug signed files should never be used for distribution.
 Since the app isn't meant for official distribution, there is no need to go through the signing process.
