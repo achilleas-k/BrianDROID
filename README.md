@@ -62,7 +62,7 @@ One may wish to zipalign the APK before installing by running ``zipalign -f -v 4
 
 --------
 --------
-BrianDROID is a Google Summer of Code, 2013 project under the support of the [INCF](http://www.incf.org/) (as a mentoring organisation) and the two project mentors, Marcel Stimberg and Dan Goodman.
+BrianDROID was written by Achilleas Koutsou during the Google Summer of Code, 2013 project under the support of the [INCF](http://www.incf.org/) (as a mentoring organisation) and the two project mentors, Marcel Stimberg and Dan Goodman.
 
 See the [INCF project page](http://www.incf.org/gsoc/2013/briandroid-neural-simulation-on-mobile-devices) and the [GSoC project page](http://www.google-melange.com/gsoc/project/google/gsoc2013/achilleask/24002) for the original project description.
 
